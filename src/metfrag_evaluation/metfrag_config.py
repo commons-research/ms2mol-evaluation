@@ -29,6 +29,16 @@ class MetFragConfig(Hashable):
 
         adduct_to_int = ADDUCTS_TO_VALUE[adduct_type]
         self._database_type = database_type
+        self._results_path = (
+            Path(results_path) if isinstance(results_path, str) else results_path
+        )
+        self._results_file = (
+            Path(results_file) if isinstance(results_file, str) else results_file
+        )
+        self._peak_list_file = (
+            Path(peak_list_file) if isinstance(peak_list_file, str) else peak_list_file
+        )
+
         self._universal_params = {
             "PrecursorIonMode": adduct_to_int,
             "FragmentPeakMatchRelativeMassDeviation": 5.0,
@@ -36,7 +46,6 @@ class MetFragConfig(Hashable):
             "MetFragCandidateWriter": "CSV",
             "DatabaseSearchRelativeMassDeviation": 10.0,
             "FragmentPeakMatchAbsoluteMassDeviation": 0.001,
-            "ResultsPath": "metfrag_results",
             "IonizedPrecursorMass": precursor_mass,
             "MetFragScoreTypes": "FragmenterScore",
             "MetFragScoreWeights": 1.0,
@@ -137,3 +146,21 @@ class MetFragConfig(Hashable):
             },
             use_approximation=use_approximation,
         )
+
+    def get_results_path(self) -> Path:
+        """
+        Returns the results path as a Path object.
+        """
+        return self._results_path
+
+    def get_results_file(self) -> Path:
+        """
+        Returns the results file path as a Path object.
+        """
+        return self._results_file
+
+    def get_peak_list_file(self) -> Path:
+        """
+        Returns the peak list file path as a Path object.
+        """
+        return self._peak_list_file

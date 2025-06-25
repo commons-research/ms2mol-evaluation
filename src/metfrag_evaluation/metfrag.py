@@ -25,10 +25,7 @@ def write_metfrag_config(config: "MetFragConfig") -> str:
     return config_file_name
 
 
-@Cache(
-    "./data/metfrag_cache/{_hash}/spectrum_hash.txt",
-)
-def get_spectrum_hash(spectrum: Spectrum, use_approximation=True) -> str:
+def get_spectrum_hash(spectrum: Spectrum, use_approximation=False) -> str:
     return spectrum.consistent_hash(use_approximation=use_approximation)
 
 
@@ -36,25 +33,42 @@ def spectrum_to_metfrag(
     spectrum: Spectrum,
     config_params: T.Optional[T.Dict[str, T.Any]] = None,
 ) -> T.Tuple[str, "MetFragConfig"]:
-    peak_list_file = (
-        Path(
-            Cache.compute_path(get_spectrum_hash, spectrum, use_approximation=True)
-        ).parent
-        / "peak_list.txt"
-    )
-    peak_list_file.parent.mkdir(parents=True, exist_ok=True)
+    # Step 1: Compute spectrum hash
+    spectrum_hash = get_spectrum_hash(spectrum, use_approximation=False)
 
+    # Step 2: Create a temporary config to compute config hash
+    temp_peak_list_file = Path(
+        f"cache/peak_list_{spectrum_hash}.txt"
+    )  # dummy path for hash computation
+    temp_config = MetFragConfig(
+        spectrum.get("precursor_mz"),
+        spectrum.get("adduct"),
+        peak_list_file=temp_peak_list_file,
+        results_path="cache",  # dummy path
+        results_file="results",
+        config_params=config_params,
+    )
+    config_hash = temp_config.consistent_hash(use_approximation=False)
+
+    # Step 3: Combine hashes for directory
+    combined_dir = Path(f"data/metfrag_cache/{spectrum_hash}_{config_hash}")
+    combined_dir.mkdir(parents=True, exist_ok=True)
+    peak_list_file = combined_dir / "peak_list.txt"
+
+    # Step 4: Write peak list to the new directory
     pd.DataFrame(spectrum.peaks.to_numpy).to_csv(
         str(peak_list_file),
         sep="\t",
         header=False,
         index=False,
     )
+
+    # Step 5: Create the final config with correct paths
     config = MetFragConfig(
         spectrum.get("precursor_mz"),
         spectrum.get("adduct"),
         peak_list_file=peak_list_file,
-        results_path=peak_list_file.parent,
+        results_path=combined_dir,
         results_file="results",
         config_params=config_params,
     )
@@ -66,18 +80,25 @@ def spectrum_to_metfrag(
 def run_metfrag(
     spectrum: Spectrum,
     config_params: T.Optional[T.Dict[str, T.Any]] = None,
-) -> T.Tuple[str, "MetFragConfig"]:
+) -> T.Tuple[str, "MetFragConfig", pd.DataFrame]:
     """
-    Run MetFrag on a given spectrum with the provided configuration.
+    Run MetFrag on a given spectrum with the provided configuration, or load results if they already exist.
 
     Args:
         spectrum (Spectrum): The spectrum to analyze.
         config_params (dict, optional): Additional configuration parameters for MetFrag.
 
     Returns:
-        tuple: A tuple containing the path to the MetFrag configuration file and the MetFragConfig object.
+        tuple: A tuple containing the path to the MetFrag configuration file, the MetFragConfig object, and the results DataFrame.
     """
     config_file, config = spectrum_to_metfrag(spectrum, config_params)
+
+    # Determine expected results CSV path
+    results_csv = Path(config.get_results_path()) / f"{config.get_results_file()}.csv"
+    if results_csv.exists():
+        # Results already exist, skip running MetFrag
+        Path(config_file).unlink(missing_ok=True)
+        return config_file, config, pd.read_csv(results_csv)
 
     command = [
         "java",
@@ -94,4 +115,4 @@ def run_metfrag(
 
     # once the process is done, we can delete the config file
     Path(config_file).unlink(missing_ok=True)
-    return config_file, config
+    return config_file, config, pd.read_csv(results_csv)
