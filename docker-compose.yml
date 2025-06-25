@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: ${LOTUS_DB_PGDATABASE:-lotus_db}
+    environment:
+      POSTGRES_USER: ${LOTUS_DB_POSTGRES_USER:-default_user}
+      POSTGRES_PASSWORD: ${LOTUS_DB_POSTGRES_PASSWORD:-default_password}
+      POSTGRES_DB: ${LOTUS_DB_PGDATABASE:-lotus_metfrag}
+    ports:
+      - "127.0.0.1:${LOTUS_DB_PGPORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
