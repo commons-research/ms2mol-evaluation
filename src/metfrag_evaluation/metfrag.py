@@ -29,7 +29,7 @@ def get_spectrum_hash(spectrum: Spectrum, use_approximation=False) -> str:
     return spectrum.consistent_hash(use_approximation=use_approximation)
 
 
-def spectrum_to_metfrag(
+def create_metfrag_config(
     spectrum: Spectrum,
     config_params: T.Optional[T.Dict[str, T.Any]] = None,
 ) -> T.Tuple[str, "MetFragConfig"]:
@@ -91,11 +91,11 @@ def run_metfrag(
     Returns:
         tuple: A tuple containing the path to the MetFrag configuration file, the MetFragConfig object, and the results DataFrame.
     """
-    config_file, config = spectrum_to_metfrag(spectrum, config_params)
+    config_file, config = create_metfrag_config(spectrum, config_params)
 
     # Determine expected results CSV path
     results_csv = Path(config.get_results_path()) / f"{config.get_results_file()}.csv"
-    if results_csv.exists():
+    if results_csv.exists() and not pd.read_csv(results_csv).empty:
         # Results already exist, skip running MetFrag
         Path(config_file).unlink(missing_ok=True)
         return config_file, config, pd.read_csv(results_csv)
