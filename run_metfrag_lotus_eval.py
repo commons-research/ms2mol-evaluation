@@ -2,12 +2,13 @@ import argparse
 import random
 
 import pandas as pd
+from downloaders import BaseDownloader
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-from metfrag_evaluation import massspecgym
 from metfrag_evaluation.massspecgym import load_massspecgym, to_spectra
 from metfrag_evaluation.metfrag import run_metfrag
+from metfrag_evaluation.spectrum import Spectrum
 
 
 def main():
@@ -21,9 +22,13 @@ def main():
         help="Number of CPUs to use (default: all available)",
     )
     args = parser.parse_args()
+    _ = BaseDownloader(auto_extract=False).download(
+        "https://github.com/ipb-halle/MetFragRelaunched/releases/download/v2.6.6/MetFragCommandLine-2.6.6.jar",
+        "MetFragCommandLine-2.6.6.jar",
+    )
 
     massspecgym = load_massspecgym()
-    spectra = to_spectra(massspecgym)
+    spectra: Spectrum = to_spectra(massspecgym)
     lotus = pd.read_csv("data/lotus/230106_frozen_metadata.csv.gz", compression="gzip")
     lotus["structure_inchikey_1"] = lotus["structure_inchikey"].apply(
         lambda x: x.split("-")[0]
