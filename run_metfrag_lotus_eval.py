@@ -86,7 +86,7 @@ def analyze_results(
     n_spectrum_na = 0
     for spectrum, res in tqdm(zip(spectra, results), desc="Analyzing results"):
         # get the metadata from the spectrum
-        inchikey = spectrum.get("inchikey")
+        inchikey:str = spectrum.get("inchikey")
         instrument_type = spectrum.get("instrument_type")
         adduct = spectrum.get("adduct")
 
@@ -108,7 +108,7 @@ def analyze_results(
         df_10 = res.iloc[:10]
         df_20 = res.iloc[:20]
 
-        if inchikey in df_1["structure_inchikey_1"].values:
+        if inchikey in df_1["InChIKey1"].values:
             metrics["top_1"] += 1
             if adduct == "[M+H]+":
                 metrics["top_1_h"] += 1
@@ -119,7 +119,7 @@ def analyze_results(
             elif instrument_type == "QTOF":
                 metrics["top_1_qtof"] += 1
 
-        if inchikey in df_5["structure_inchikey_1"].values:
+        if inchikey in df_5["InChIKey1"].values:
             metrics["top_5"] += 1
             if adduct == "[M+H]+":
                 metrics["top_5_h"] += 1
@@ -130,7 +130,7 @@ def analyze_results(
             elif instrument_type == "QTOF":
                 metrics["top_5_qtof"] += 1
 
-        if inchikey in df_10["structure_inchikey_1"].values:
+        if inchikey in df_10["InChIKey1"].values:
             metrics["top_10"] += 1
             if adduct == "[M+H]+":
                 metrics["top_10_h"] += 1
@@ -141,7 +141,7 @@ def analyze_results(
             elif instrument_type == "QTOF":
                 metrics["top_10_qtof"] += 1
 
-        if inchikey in df_20["structure_inchikey_1"].values:
+        if inchikey in df_20["InChIKey1"].values:
             metrics["top_20"] += 1
             if adduct == "[M+H]+":
                 metrics["top_20_h"] += 1
