@@ -1,5 +1,4 @@
 import argparse
-import random
 import typing as T
 import pandas as pd
 from downloaders import BaseDownloader
@@ -28,7 +27,7 @@ def main():
     )
 
     massspecgym = load_massspecgym()
-    spectra: Spectrum = to_spectra(massspecgym)
+    spectra: T.List[Spectrum] = to_spectra(massspecgym)
     lotus = pd.read_csv("data/lotus/230106_frozen_metadata.csv.gz", compression="gzip")
     lotus["structure_inchikey_1"] = lotus["structure_inchikey"].apply(
         lambda x: x.split("-")[0]
@@ -37,8 +36,9 @@ def main():
 
     inchikeys = set(lotus["structure_inchikey_1"].values)
 
-    spectra = [i for i in tqdm(spectra, leave=False) if i.get("inchikey") in inchikeys]
-    random.Random(42).shuffle(spectra)
+    spectra: T.List[Spectrum] = [
+        i for i in tqdm(spectra, leave=False) if i.get("inchikey") in inchikeys
+    ]
 
     results = Parallel(n_jobs=args.n_jobs)(
         delayed(run_metfrag)(spectrum) for spectrum in tqdm(spectra)
@@ -50,7 +50,23 @@ def main():
     resulting_dataframes = [i[2] for i in results]
 
     res = analyze_results(spectra, resulting_dataframes)
-    metrics = res.pop("metrics")
+    metrics: T.Dict[str, int] = res.pop("metrics")
+    for key, value in metrics.items():
+        if "_h" in key:
+            metrics[key] = metrics[key] / res["n_spectrum_h"]
+        elif "_na" in key:
+            metrics[key] = metrics[key] / res["n_spectrum_na"]
+        elif "_orbitrap" in key:
+            metrics[key] = metrics[key] / res["n_spectrum_orbitrap"]
+        elif "_qtof" in key:
+            metrics[key] = metrics[key] / res["n_spectrum_qtof"]
+        else:
+            metrics[key] = metrics[key] / res["n_total"]
+
+    pd.DataFrame.from_dict(
+        metrics,
+        orient="index",
+    ).T.to_csv("lotus_metfrag_results.csv", index=False)
 
 
 def analyze_results(
@@ -84,9 +100,11 @@ def analyze_results(
     n_spectrum_qtof = 0
     n_spectrum_h = 0
     n_spectrum_na = 0
-    for spectrum, res in tqdm(zip(spectra, results), desc="Analyzing results"):
+    for spectrum, res in tqdm(
+        zip(spectra, results), desc="Analyzing results", total=len(spectra)
+    ):
         # get the metadata from the spectrum
-        inchikey:str = spectrum.get("inchikey")
+        inchikey: T.Optional[str] = spectrum.get("inchikey")
         instrument_type = spectrum.get("instrument_type")
         adduct = spectrum.get("adduct")
 
