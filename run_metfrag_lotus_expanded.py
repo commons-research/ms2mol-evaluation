@@ -43,7 +43,10 @@ def main():
     ]
 
     results = Parallel(n_jobs=args.n_jobs)(
-        delayed(run_metfrag)(spectrum) for spectrum in tqdm(spectra)
+        delayed(run_metfrag)(
+            spectrum, {"LocalDatabaseCompoundsTable": "lotus_expanded"}
+        )
+        for spectrum in tqdm(spectra, desc="Running MetFrag")
     )
 
     # we now check the top 1, 5, 10 and 20 results
@@ -71,7 +74,7 @@ def main():
     ).T
 
     convert_evaluation_results(out_df).to_csv(
-        "lotus_metfrag_results.csv",
+        "lotus_expanded_metfrag_results.csv",
     )
 
 
