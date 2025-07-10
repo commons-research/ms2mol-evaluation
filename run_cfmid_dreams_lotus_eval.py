@@ -5,10 +5,11 @@ import numpy as np
 import pandas as pd
 from cache_decorator import Cache
 from downloaders import BaseDownloader
-from matchms import calculate_scores
+from dreams.api import dreams_embeddings
+from matchms.exporting import save_as_mgf
 from matchms.filtering import default_filters
 from matchms.importing import load_from_mgf
-from matchms.similarity import CosineGreedy, PrecursorMzMatch
+from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm, trange
 
 from metfrag_evaluation.massspecgym import load_massspecgym, to_spectra
@@ -21,6 +22,14 @@ def download_isdb() -> None:
         "https://zenodo.org/records/14887271/files/isdb_lotus_pos_energySum.mgf",
         "data/isdb/isdb_lotus_pos_energySum.mgf",
     )
+
+
+def load_isdb_dreams_embedding() -> np.ndarray:
+    """Load ISDB spectra from MGF file."""
+
+    dreams_embs = load_dreams_embedding("data/isdb/isdb_lotus_pos_energySum.mgf")
+
+    return dreams_embs
 
 
 @Cache()
@@ -59,60 +68,62 @@ def filter_massspecgym_spectra(
     return filtered_spectra
 
 
+@Cache()
+def load_dreams_embedding(path: str) -> np.ndarray:
+    """Load DREAMS embeddings from a file."""
+    dreams_embs: np.ndarray = dreams_embeddings(path, prec_mz_col="PRECURSOR_MZ")
+    return dreams_embs
+
+
 def main():
     download_isdb()
     massspecgym = load_massspecgym()
     spectra: T.List[Spectrum] = to_spectra(massspecgym)
     isdb: T.List[Spectrum] = load_isdb()
 
+    # load ISDB DreaMS embedding
+    isdb_embedding: np.ndarray = load_isdb_dreams_embedding()
+
     # we filter the MassSpecGym spectra to only include those present in ISDB
     spectra = filter_massspecgym_spectra(spectra, isdb)
 
-    similarity_score = PrecursorMzMatch(tolerance=10.0, tolerance_type="ppm")
-    chunks_query = [spectra[x : x + 1000] for x in range(0, len(spectra), 1000)]
+    os.makedirs("data/massspecgym", exist_ok=True)
+    save_as_mgf(spectra, "data/massspecgym/massspecgym.mgf", file_mode="w")
+    spectra_embedding = load_dreams_embedding("data/massspecgym/massspecgym.mgf")
 
-    cosinegreedy = CosineGreedy(tolerance=0.01)
+    sims = cosine_similarity(spectra_embedding, isdb_embedding)
 
-    scans_id_map = {}
-    i = 0
-    for chunk_number, chunk in enumerate(tqdm(chunks_query)):
-        scores = calculate_scores(chunk, isdb, similarity_score)
-        idx_row = scores.scores[:, :][0]
-        idx_col = scores.scores[:, :][1]
+    # now we sort
+    sorted_indices = np.argsort(sims, axis=1)[:, ::-1]
 
-        for _ in chunk:
-            scans_id_map[i] = i
-            i += 1
+    scores_of_true_inchikey = []
+    positions_of_true_inchikey = []
+    inichikeys_of_true_mol = []
+    smiles_of_true_inchikey = []
 
-        data = []
-        for x, y in zip(idx_row, idx_col):
-            if x >= y:
+    for i in trange(sorted_indices.shape[0], desc="Processing spectra"):
+        spectrum = spectra[i]
+        for j in range(sorted_indices.shape[1]):
+            if spectrum.get("inchikey") != isdb[sorted_indices[i, j]].get(
+                "compound_name"
+            ):
                 continue
-            msms_score, n_matches = cosinegreedy.pair(chunk[x], isdb[y])[()]
-            # if (msms_score > 0.2) and (n_matches > 6):
 
-            feature_id = scans_id_map[int(x) + int(1000 * chunk_number)]
-            data.append(
-                {
-                    "msms_score": msms_score,
-                    "matched_peaks": n_matches,
-                    "feature_id": feature_id,
-                    "reference_id": y
-                    + 1,  # code copied from https://github.com/mandelbrot-project/met_annot_enhancer/blob/f8346fd3f7a9775d1d6638cf091d019167ba7ce1/src/dev/spectral_lib_matcher.py#L175
-                    "inchikey_isdb": isdb[y].get("compound_name"),
-                    "inchikey_msg": chunk[x].get("inchikey"),
-                    "adduct": chunk[x].get("adduct"),
-                    "instrument": chunk[x].get("instrument_type"),
-                }
-            )
-        df = pd.DataFrame(data)
-        df.to_csv(
-            "lotus_cfmid_scores.csv",
-            mode="a",
-            header=not os.path.exists("lotus_cfmid_scores.csv"),
-            sep=",",
-            index=False,
-        )
+            scores_of_true_inchikey.append(sims[i, sorted_indices[i, j]])
+            positions_of_true_inchikey.append(j + 1)
+            inichikeys_of_true_mol.append(spectrum.get("inchikey"))
+            smiles_of_true_inchikey.append(spectrum.get("smiles"))
+            break
+
+    df = pd.DataFrame(
+        {
+            "score": scores_of_true_inchikey,
+            "top_n": positions_of_true_inchikey,
+            "inchikey": inichikeys_of_true_mol,
+            "smiles": smiles_of_true_inchikey,
+        }
+    )
+    df.to_csv("lotus_cfmid_dreams_scores.csv", index=False)
 
 
 if __name__ == "__main__":
