@@ -6,10 +6,10 @@ from downloaders import BaseDownloader
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-from metfrag_evaluation.massspecgym import load_massspecgym, to_spectra
-from metfrag_evaluation.metfrag import run_metfrag
-from metfrag_evaluation.spectrum import Spectrum
-from metfrag_evaluation.utils import (
+from ms2mol_evaluation.massspecgym import load_massspecgym, to_spectra
+from ms2mol_evaluation.metfrag import run_metfrag
+from ms2mol_evaluation.spectrum import Spectrum
+from ms2mol_evaluation.utils import (
     analyze_results,
     convert_evaluation_results,
     generate_full_results,

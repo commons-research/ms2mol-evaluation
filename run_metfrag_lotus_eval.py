@@ -6,10 +6,11 @@ from downloaders import BaseDownloader
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-from metfrag_evaluation.massspecgym import load_massspecgym, to_spectra
-from metfrag_evaluation.metfrag import run_metfrag
-from metfrag_evaluation.spectrum import Spectrum
-from metfrag_evaluation.utils import (
+from ms2mol_evaluation.isdb import download_isdb, filter_massspecgym_spectra, load_isdb
+from ms2mol_evaluation.massspecgym import load_massspecgym, to_spectra
+from ms2mol_evaluation.metfrag import run_metfrag
+from ms2mol_evaluation.spectrum import Spectrum
+from ms2mol_evaluation.utils import (
     analyze_results,
     convert_evaluation_results,
     generate_full_results,
@@ -34,17 +35,9 @@ def main():
 
     massspecgym = load_massspecgym()
     spectra: T.List[Spectrum] = to_spectra(massspecgym)
-    lotus = pd.read_csv("data/lotus/230106_frozen_metadata.csv.gz", compression="gzip")
-    lotus["structure_inchikey_1"] = lotus["structure_inchikey"].apply(
-        lambda x: x.split("-")[0]
-    )
-    lotus.drop_duplicates(subset=["structure_inchikey_1"], inplace=True)
-
-    inchikeys = set(lotus["structure_inchikey_1"].values)
-
-    spectra: T.List[Spectrum] = [
-        i for i in tqdm(spectra, leave=False) if i.get("inchikey") in inchikeys
-    ]
+    download_isdb()
+    isdb: T.List[Spectrum] = load_isdb()
+    spectra = filter_massspecgym_spectra(spectra, isdb, hydrogen_adduct_only=False)
 
     results = Parallel(n_jobs=args.n_jobs)(
         delayed(run_metfrag)(spectrum) for spectrum in tqdm(spectra)
@@ -75,7 +68,7 @@ def main():
     ).T
 
     convert_evaluation_results(out_df).to_csv(
-        "lotus_metfrag_results.csv",
+        "lotus_metfrag_top_n.csv",
     )
 
     df = generate_full_results(spectra, resulting_dataframes)

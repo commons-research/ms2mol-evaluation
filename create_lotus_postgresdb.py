@@ -5,7 +5,7 @@ import psycopg2
 from dotenv import load_dotenv
 from tqdm import tqdm
 
-from metfrag_evaluation.lotus import (
+from ms2mol_evaluation.lotus import (
     create_lotus_table_query,
     generate_index_query,
     generate_insert_query,

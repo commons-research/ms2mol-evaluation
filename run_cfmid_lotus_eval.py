@@ -1,62 +1,14 @@
 import os
 import typing as T
 
-import numpy as np
 import pandas as pd
-from cache_decorator import Cache
-from downloaders import BaseDownloader
 from matchms import calculate_scores
-from matchms.filtering import default_filters
-from matchms.importing import load_from_mgf
 from matchms.similarity import CosineGreedy, PrecursorMzMatch
-from tqdm import tqdm, trange
+from tqdm import tqdm
 
-from metfrag_evaluation.massspecgym import load_massspecgym, to_spectra
-from metfrag_evaluation.spectrum import Spectrum
-
-
-def download_isdb() -> None:
-    downloader = BaseDownloader(auto_extract=False)
-    _ = downloader.download(
-        "https://zenodo.org/records/14887271/files/isdb_lotus_pos_energySum.mgf",
-        "data/isdb/isdb_lotus_pos_energySum.mgf",
-    )
-
-
-@Cache()
-def load_isdb() -> T.List[Spectrum]:
-    """Load ISDB spectra from MGF file."""
-    spectra = []
-    for spectrum in tqdm(
-        load_from_mgf("data/isdb/isdb_lotus_pos_energySum.mgf"),
-        desc="Loading ISDB spectra",
-        leave=False,
-    ):
-        spectrum = default_filters(spectrum)
-        spectrum = Spectrum(
-            mz=spectrum.mz,
-            intensities=spectrum.intensities,
-            metadata=spectrum.metadata,
-        )
-        spectra.append(spectrum)
-
-    return spectra
-
-
-def filter_massspecgym_spectra(
-    massspecgym_spectra: T.List[Spectrum], isdb_spectra: T.List[Spectrum]
-) -> T.List[Spectrum]:
-    """Filter MassSpecGym spectra to only include those present in ISDB."""
-    isdb_inchikeys = set(s.get("compound_name") for s in isdb_spectra)
-    filtered_spectra = [
-        s
-        for s in tqdm(
-            massspecgym_spectra, leave=False, desc="Filtering MassSpecGym spectra"
-        )
-        if s.get("inchikey") in isdb_inchikeys
-    ]
-    filtered_spectra = [s for s in filtered_spectra if s.get("adduct") == "[M+H]+"]
-    return filtered_spectra
+from ms2mol_evaluation.isdb import download_isdb, filter_massspecgym_spectra, load_isdb
+from ms2mol_evaluation.massspecgym import load_massspecgym, to_spectra
+from ms2mol_evaluation.spectrum import Spectrum
 
 
 def main():
@@ -66,10 +18,11 @@ def main():
     isdb: T.List[Spectrum] = load_isdb()
 
     # we filter the MassSpecGym spectra to only include those present in ISDB
-    spectra = filter_massspecgym_spectra(spectra, isdb)
+    spectra = filter_massspecgym_spectra(spectra, isdb, hydrogen_adduct_only=True)
 
     similarity_score = PrecursorMzMatch(tolerance=10.0, tolerance_type="ppm")
-    chunks_query = [spectra[x : x + 1000] for x in range(0, len(spectra), 1000)]
+    interval = 1000
+    chunks_query = [spectra[x : x + interval] for x in range(0, len(spectra), interval)]
 
     cosinegreedy = CosineGreedy(tolerance=0.01)
 
@@ -91,18 +44,20 @@ def main():
             msms_score, n_matches = cosinegreedy.pair(chunk[x], isdb[y])[()]
             # if (msms_score > 0.2) and (n_matches > 6):
 
-            feature_id = scans_id_map[int(x) + int(1000 * chunk_number)]
+            feature_id = scans_id_map[int(x) + int(interval * chunk_number)]
             data.append(
                 {
-                    "msms_score": msms_score,
+                    "cosine_similarity": msms_score,
                     "matched_peaks": n_matches,
                     "feature_id": feature_id,
-                    "reference_id": y
-                    + 1,  # code copied from https://github.com/mandelbrot-project/met_annot_enhancer/blob/f8346fd3f7a9775d1d6638cf091d019167ba7ce1/src/dev/spectral_lib_matcher.py#L175
+                    "reference_id": y,  # code copied from https://github.com/mandelbrot-project/met_annot_enhancer/blob/f8346fd3f7a9775d1d6638cf091d019167ba7ce1/src/dev/spectral_lib_matcher.py#L175
                     "inchikey_isdb": isdb[y].get("compound_name"),
+                    "smiles_isdb": isdb[y].get("smiles"),
                     "inchikey_msg": chunk[x].get("inchikey"),
+                    "smiles_msg": chunk[x].get("smiles"),
                     "adduct": chunk[x].get("adduct"),
                     "instrument": chunk[x].get("instrument_type"),
+                    "identifier": chunk[x].get("identifier"),
                 }
             )
         df = pd.DataFrame(data)

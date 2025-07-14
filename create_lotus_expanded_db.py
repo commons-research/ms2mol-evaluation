@@ -18,7 +18,7 @@ from skfp.preprocessing import (
 )
 from tqdm import tqdm
 
-from metfrag_evaluation.lotus_expanded import create_insert_query, create_table_query
+from ms2mol_evaluation.lotus_expanded import create_insert_query, create_table_query
 
 load_dotenv()
 

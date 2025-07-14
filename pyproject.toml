@@ -1,5 +1,5 @@
 [project]
-name = "metfrag-evaluation"
+name = "ms2mol-evaluation"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
