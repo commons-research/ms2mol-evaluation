@@ -1,10 +1,13 @@
 import os
+import typing as T
 from pathlib import Path
 
+import pandas as pd
 from matchms.exporting import save_as_mgf
 
 from ms2mol_evaluation.isdb import filter_massspecgym_spectra, load_isdb
 from ms2mol_evaluation.massspecgym import load_massspecgym, to_spectra
+from ms2mol_evaluation.spectrum import Spectrum
 
 
 def main():
@@ -35,6 +38,23 @@ def main():
     output_file_qtof = output_path / Path("sirius_qtof.mgf")
     save_as_mgf(spectra_orbitrap, str(output_file_orbi), file_mode="w")
     save_as_mgf(spectra_qtof, str(output_file_qtof), file_mode="w")
+
+    df_for_custom_db = create_dataframe_from_spectra_list(spectra)
+    df_for_custom_db.to_csv(
+        output_path / Path("sirius_custom_db.tsv"),
+        index=False,
+        sep="\t",
+    )
+
+
+def create_dataframe_from_spectra_list(
+    spectra_list: T.List[Spectrum],
+) -> pd.DataFrame:
+    smiles = [s.get("smiles") for s in spectra_list]
+    inchikey = [s.get("inchikey") for s in spectra_list]
+
+    df = pd.DataFrame({"smiles": smiles, "name": inchikey})
+    return df
 
 
 if __name__ == "__main__":

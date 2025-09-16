@@ -1,6 +1,8 @@
 import pandas as pd
 from downloaders import BaseDownloader
 
+from ms2mol_evaluation.isdb import download_isdb, load_isdb
+
 
 def create_lotus_table_query():
     query = """
@@ -15,7 +17,7 @@ CREATE TABLE IF NOT EXISTS lotus (
     inchikey_1 CHAR(14) NOT NULL,
     inchikey_2 VARCHAR(10) NOT NULL,
     smiles TEXT NOT NULL,
-    name CHAR(27) NOT NULL,
+    name CHAR(14) NOT NULL,
     inchikey_3 CHAR(1) NOT NULL
 );
 """
@@ -30,32 +32,30 @@ def load_lotus_for_metfrag() -> pd.DataFrame:
         pd.DataFrame: DataFrame containing LOTUS data.
     """
 
-    lotus_path = "data/lotus/230106_frozen_metadata.csv.gz"
-    _ = BaseDownloader(auto_extract=False).download(
-        urls="https://zenodo.org/records/7534071/files/230106_frozen_metadata.csv.gz",
-        paths=lotus_path,
-    )
-
-    lotus = pd.read_csv(lotus_path, compression="gzip")
+    download_isdb()
+    isdb = load_isdb()
+    identifier = [s.get("compound_name") for s in isdb]
+    inchi = [s.get("inchi") for s in isdb]
+    exact_mass = [s.get("parent_mass") for s in isdb]
+    molecular_formula = [s.get("molecular_formula") for s in isdb]
+    inchikey_1 = [s.get("compound_name") for s in isdb]
+    inchikey_2 = [s.get("inchikey").split("-")[1] for s in isdb]
+    inchikey_3 = [s.get("inchikey").split("-")[2] for s in isdb]
+    smiles = [s.get("smiles") for s in isdb]
+    name = [s.get("compound_name") for s in isdb]
 
     lotus_db = (
         pd.DataFrame(
             {
-                "Identifier": lotus["structure_wikidata"],
-                "InChI": lotus["structure_inchi"],
-                "MonoisotopicMass": lotus["structure_exact_mass"],
-                "MolecularFormula": lotus["structure_molecular_formula"],
-                "InChIKey1": lotus["structure_inchikey"].apply(
-                    lambda x: x.split("-")[0]
-                ),
-                "InChIKey2": lotus["structure_inchikey"].apply(
-                    lambda x: x.split("-")[1]
-                ),
-                "SMILES": lotus["structure_smiles_2D"],
-                "Name": lotus["structure_inchikey"],
-                "InChIKey3": lotus["structure_inchikey"].apply(
-                    lambda x: x.split("-")[2]
-                ),
+                "Identifier": identifier,
+                "InChI": inchi,
+                "MonoisotopicMass": exact_mass,
+                "MolecularFormula": molecular_formula,
+                "InChIKey1": inchikey_1,
+                "InChIKey2": inchikey_2,
+                "SMILES": smiles,
+                "Name": name,
+                "InChIKey3": inchikey_3,
             }
         )
         .drop_duplicates("InChIKey1")
