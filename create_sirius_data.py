@@ -16,7 +16,6 @@ def main():
     isdb = load_isdb()
     spectra = filter_massspecgym_spectra(spectra, isdb, hydrogen_adduct_only=False)
 
-    # spectra = spectra[:100]  # for testing purposes
     spectra_orbitrap = [s for s in spectra if s.get("instrument_type") == "Orbitrap"]
     spectra_qtof = [s for s in spectra if s.get("instrument_type") == "QTOF"]
 
@@ -39,7 +38,7 @@ def main():
     save_as_mgf(spectra_orbitrap, str(output_file_orbi), file_mode="w")
     save_as_mgf(spectra_qtof, str(output_file_qtof), file_mode="w")
 
-    df_for_custom_db = create_dataframe_from_spectra_list(spectra)
+    df_for_custom_db = create_dataframe_from_spectra_list(isdb)
     df_for_custom_db.to_csv(
         output_path / Path("sirius_custom_db.tsv"),
         index=False,
@@ -48,10 +47,10 @@ def main():
 
 
 def create_dataframe_from_spectra_list(
-    spectra_list: T.List[Spectrum],
+    isdb: T.List[Spectrum],
 ) -> pd.DataFrame:
-    smiles = [s.get("smiles") for s in spectra_list]
-    inchikey = [s.get("inchikey") for s in spectra_list]
+    smiles = [s.get("smiles") for s in isdb]
+    inchikey = [s.get("compound_name") for s in isdb]
 
     df = pd.DataFrame({"smiles": smiles, "name": inchikey})
     return df

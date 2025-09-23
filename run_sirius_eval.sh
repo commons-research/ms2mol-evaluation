@@ -9,13 +9,12 @@ sirius --input data/sirius/sirius_orbitrap.mgf \
     --FormulaSettings.enforced=H,C,N,O,P \
     --Timeout.secondsPerInstance=0 \
     --AlgorithmProfile=orbitrap \
-    --SpectralMatchingMassDeviation.allowedPeakDeviation=10.0ppm \
     --AdductSettings.ignoreDetectedAdducts=false \
     --AdductSettings.prioritizeInputFileAdducts=true \
     --UseHeuristic.useHeuristicAboveMz=300 \
     --IsotopeMs2Settings=IGNORE \
     --MS2MassDeviation.allowedMassDeviation=10.0ppm \
-    --SpectralMatchingMassDeviation.allowedPrecursorDeviation=10.0ppm \
+    --IdentitySearchSettings.precursorDeviation=20.0ppm \
     --FormulaSearchSettings.performDeNovoBelowMz=400.0 \
     --FormulaSearchSettings.applyFormulaConstraintsToDatabaseCandidates=false \
     --EnforceElGordoFormula=true \
@@ -31,7 +30,7 @@ sirius --input data/sirius/sirius_orbitrap.mgf \
     --NumberOfCandidates=10 \
     --FormulaResultThreshold=true \
     --ExpansiveSearchConfidenceMode.confidenceScoreSimilarityMode=OFF \
-    --StructureSearchDB=LOTUS \
+    --StructureSearchDB=lotusISDB \
     --RecomputeResults=false \
     spectra-search formulas fingerprints classes structures summaries --chemvista --feature-quality-summary --full-summary ;
 
@@ -44,14 +43,13 @@ sirius \
     --CandidateFormulas=, \
     --FormulaSettings.enforced=H,C,N,O,P \
     --Timeout.secondsPerInstance=0 \
-    --AlgorithmProfile=orbitrap \
-    --SpectralMatchingMassDeviation.allowedPeakDeviation=10.0ppm \
+    --AlgorithmProfile=qtof \
     --AdductSettings.ignoreDetectedAdducts=false \
     --AdductSettings.prioritizeInputFileAdducts=true \
     --UseHeuristic.useHeuristicAboveMz=300 \
     --IsotopeMs2Settings=IGNORE \
     --MS2MassDeviation.allowedMassDeviation=10.0ppm \
-    --SpectralMatchingMassDeviation.allowedPrecursorDeviation=10.0ppm \
+    --IdentitySearchSettings.precursorDeviation=20.0ppm \
     --FormulaSearchSettings.performDeNovoBelowMz=400.0 \
     --FormulaSearchSettings.applyFormulaConstraintsToDatabaseCandidates=false \
     --EnforceElGordoFormula=true \
@@ -67,6 +65,6 @@ sirius \
     --NumberOfCandidates=10 \
     --FormulaResultThreshold=true \
     --ExpansiveSearchConfidenceMode.confidenceScoreSimilarityMode=OFF \
-    --StructureSearchDB=LOTUS \
+    --StructureSearchDB=lotusISDB \
     --RecomputeResults=false \
     spectra-search formulas fingerprints classes structures summaries --chemvista --feature-quality-summary --full-summary ; 

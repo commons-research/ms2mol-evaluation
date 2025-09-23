@@ -45,7 +45,7 @@ class MetFragConfig(Hashable):
             "SampleName": str(results_file),
             "MetFragCandidateWriter": "CSV",
             "DatabaseSearchRelativeMassDeviation": 10.0,
-            "FragmentPeakMatchAbsoluteMassDeviation": 0.001,
+            "FragmentPeakMatchAbsoluteMassDeviation": 0.01,
             "IonizedPrecursorMass": precursor_mass,
             "MetFragScoreTypes": "FragmenterScore",
             "MetFragScoreWeights": 1.0,

@@ -20,11 +20,15 @@ def main():
     # we filter the MassSpecGym spectra to only include those present in ISDB
     spectra = filter_massspecgym_spectra(spectra, isdb, hydrogen_adduct_only=True)
 
-    similarity_score = PrecursorMzMatch(tolerance=10.0, tolerance_type="ppm")
+    similarity_score = PrecursorMzMatch(
+        tolerance=10.0, tolerance_type="ppm"
+    )  # changed to 10 ppm to see if we get more matches
     interval = 1000
     chunks_query = [spectra[x : x + interval] for x in range(0, len(spectra), interval)]
 
-    cosinegreedy = CosineGreedy(tolerance=0.01)
+    cosinegreedy = CosineGreedy(
+        tolerance=0.1
+    )  # changed to 0.1 Da to see if we get more matches
 
     scans_id_map = {}
     i = 0
