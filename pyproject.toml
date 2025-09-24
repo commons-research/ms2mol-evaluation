@@ -36,7 +36,11 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
-dev = ["ipykernel>=6.29.5", "jupyterlab>=4.4.3"]
+dev = [
+    "ipykernel>=6.29.5",
+ "jupyterlab>=4.4.3",
+ "ruff>=0.13.1",
+]
 
 [tool.uv.sources]
 dreams = { git = "https://github.com/mvisani/DreaMS" }

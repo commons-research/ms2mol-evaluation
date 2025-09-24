@@ -2,9 +2,11 @@ import typing as T
 
 import numpy as np
 import pandas as pd
+from cache_decorator import Cache
 from tqdm import tqdm
 
 
+@Cache()
 def get_fraction_of_true(
     scores: np.ndarray,
     columns: T.List[str],
@@ -34,6 +36,7 @@ def get_fraction_of_true(
     return fraction_of_true, fraction_of_df
 
 
+@Cache()
 def get_fraction_of_true_top_n(
     scores: np.ndarray,
     columns: T.List[str],
@@ -73,7 +76,6 @@ def evaluate_fraction_of_true(
     identifier_to_inchikey: T.Dict[str, str],
     interval: T.Iterable[float] = np.arange(0.0, 1.0, 0.05),
 ) -> T.Tuple[T.List[float], T.List[float]]:
-
     fraction_true_lst = []
     fraction_df_lst = []
     for threshold in tqdm(interval, desc="Thresholds"):
@@ -97,7 +99,6 @@ def evaluate_top_n_of_true(
     identifier_to_inchikey: T.Dict[str, str],
     interval: T.Iterable[int] = [1, 2, 5, 10, 20, 50, 100, 200, 500],
 ) -> T.Tuple[T.List[float], T.List[float]]:
-
     fraction_true_lst = []
     fraction_df_lst = []
     for threshold in tqdm(interval, desc="Top N"):
