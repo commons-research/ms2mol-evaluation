@@ -2,11 +2,11 @@ import typing as T
 
 import numpy as np
 import pandas as pd
+import polars as pl
 from cache_decorator import Cache
 from tqdm import tqdm
 
 
-@Cache()
 def get_fraction_of_true(
     scores: np.ndarray,
     columns: T.List[str],
@@ -20,23 +20,21 @@ def get_fraction_of_true(
     """
     scores_smaller = scores.copy()
     scores_smaller[scores_smaller < score_threshold] = np.nan
-    df_smaller = pd.DataFrame(scores_smaller)
-    df_smaller.columns = columns
-    df_smaller.index = index
+    column_indices = {col: idx for idx, col in enumerate(columns)}
 
-    # we iterate over the rows of the dataframe
+    # we iterate over the rows of the array
     fraction_of_true_among_df = 0
-    for i, row in df_smaller.iterrows():
-        if np.isnan(row[id_to_inchikey[row.name]]):
+    for i, row in zip(index, scores_smaller):
+        column_index = column_indices[id_to_inchikey[i]]
+        if np.isnan(row[column_index]):
             continue
         fraction_of_true_among_df += 1
 
-    fraction_of_true = fraction_of_true_among_df / df_smaller.shape[0]
-    fraction_of_df = 1 - (df_smaller.isna().sum().sum() / df_smaller.size)
+    fraction_of_true = fraction_of_true_among_df / scores_smaller.shape[0]
+    fraction_of_df = 1 - (np.isnan(scores_smaller).sum() / scores_smaller.size)
     return fraction_of_true, fraction_of_df
 
 
-@Cache()
 def get_fraction_of_true_top_n(
     scores: np.ndarray,
     columns: T.List[str],
@@ -56,16 +54,16 @@ def get_fraction_of_true_top_n(
         top_idx = valid_idx[np.argsort(row[valid_idx])[-top_n:]]
         scores_top_n[i, top_idx] = row[top_idx]
 
-    df_top_n = pd.DataFrame(scores_top_n, columns=columns, index=index)
-
     fraction_of_true_among_df = 0
-    for i, row in df_top_n.iterrows():
-        if np.isnan(row[id_to_inchikey[row.name]]):
+    column_indices = {col: idx for idx, col in enumerate(columns)}
+    for i, row in zip(index, scores_top_n):
+        column_index = column_indices[id_to_inchikey[i]]
+        if np.isnan(row[column_index]):
             continue
         fraction_of_true_among_df += 1
 
-    fraction_of_true = fraction_of_true_among_df / df_top_n.shape[0]
-    fraction_of_df = 1 - (df_top_n.isna().sum().sum() / df_top_n.size)
+    fraction_of_true = fraction_of_true_among_df / scores_top_n.shape[0]
+    fraction_of_df = 1 - (np.isnan(scores_top_n).sum() / scores_top_n.size)
     return fraction_of_true, fraction_of_df
 
 

@@ -24,6 +24,7 @@ dependencies = [
     "pyarrow>=20.0.0",
     "pymongo>=4.13.2",
     "python-dotenv>=1.1.1",
+    "ray>=2.49.2",
     "rdkit>=2024.9.5",
     "scikit-fingerprints>=1.16.0",
     "seaborn>=0.13.2",

@@ -3,6 +3,7 @@ import typing as T
 from pathlib import Path
 
 import pandas as pd
+import ray
 from cache_decorator import Cache
 
 from ms2mol_evaluation.metfrag_config import MetFragConfig
@@ -77,6 +78,7 @@ def create_metfrag_config(
     return config_file, config
 
 
+@ray.remote
 def run_metfrag(
     spectrum: Spectrum,
     config_params: T.Optional[T.Dict[str, T.Any]] = None,
