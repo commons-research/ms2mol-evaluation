@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "sys_platform == 'linux'",
@@ -1652,20 +1652,6 @@ wheels = [
 ]
 
 [[package]]
-name = "ms-entropy"
-version = "1.3.5"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/67/0a/827e648830b0ff20b12cb9c0bf9d1df2c378f10879dd02a2f51d4a2907f7/ms_entropy-1.3.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5e4f7cbcff68ecc786120584ca0783550ad9ba048de0574d8e98a4452769f62d", size = 200684, upload-time = "2025-03-06T04:51:29.196Z" },
-    { url = "https://files.pythonhosted.org/packages/88/d4/e0970312658c8441d1fcc566a38fe734814a6756eca271f3a0a15be2a64e/ms_entropy-1.3.5-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:15d250806f8cb23aee663b65b83e2292a68ed16094d528300c2f028daf16a11a", size = 207099, upload-time = "2025-03-06T04:51:30.321Z" },
-    { url = "https://files.pythonhosted.org/packages/fa/dd/3c8b8318f240b9c79f47526d5bc9d94aac04bfde5657e6ef21c3ff1b223a/ms_entropy-1.3.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e665ca7e149b0d2ae2fcf552f0491058df806980048e20731c27510ec1728410", size = 198630, upload-time = "2025-03-06T04:51:31.334Z" },
-    { url = "https://files.pythonhosted.org/packages/2a/96/5d797bea5e7872a2ca3fa3d7cb229ac7a30c4a67853d6ebe4b2b89614406/ms_entropy-1.3.5-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:74c6be7e2aedf292c8cf5fec3453a1e50c7f9dee5dbcc8948429783c6e6c98af", size = 204607, upload-time = "2025-03-06T04:51:33.042Z" },
-]
-
-[[package]]
 name = "ms2mol-evaluation"
 version = "0.1.0"
 source = { editable = "." }
@@ -1673,17 +1659,15 @@ dependencies = [
     { name = "cache-decorator" },
     { name = "downloaders" },
     { name = "dreams" },
-    { name = "huggingface-hub" },
     { name = "ipywidgets" },
     { name = "matchms" },
     { name = "matplotlib" },
     { name = "matplotlib-venn" },
-    { name = "ms-entropy" },
     { name = "numba" },
     { name = "pandarallel" },
     { name = "pandas" },
     { name = "polars" },
-    { name = "psycopg2" },
+    { name = "psycopg" },
     { name = "pyarrow" },
     { name = "pymongo" },
     { name = "python-dotenv" },
@@ -1706,17 +1690,15 @@ requires-dist = [
     { name = "cache-decorator", specifier = ">=2.2.0" },
     { name = "downloaders", specifier = ">=1.0.22" },
     { name = "dreams", git = "https://github.com/mvisani/DreaMS" },
-    { name = "huggingface-hub", specifier = ">=0.33.0" },
     { name = "ipywidgets", specifier = ">=8.1.7" },
     { name = "matchms", specifier = ">=0.30.0" },
     { name = "matplotlib", specifier = ">=3.10.3" },
     { name = "matplotlib-venn", specifier = ">=1.1.2" },
-    { name = "ms-entropy", specifier = ">=1.3.5" },
     { name = "numba", specifier = ">=0.61.2" },
     { name = "pandarallel", specifier = ">=1.6.5" },
     { name = "pandas", specifier = ">=2.3.0" },
     { name = "polars", specifier = ">=1.31.0" },
-    { name = "psycopg2", specifier = ">=2.9.10" },
+    { name = "psycopg", specifier = ">=3.2.10" },
     { name = "pyarrow", specifier = ">=20.0.0" },
     { name = "pymongo", specifier = ">=4.13.2" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
@@ -2417,14 +2399,16 @@ wheels = [
 ]
 
 [[package]]
-name = "psycopg2"
-version = "2.9.10"
+name = "psycopg"
+version = "3.2.10"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/62/51/2007ea29e605957a17ac6357115d0c1a1b60c8c984951c19419b3474cdfd/psycopg2-2.9.10.tar.gz", hash = "sha256:12ec0b40b0273f95296233e8750441339298e6a572f7039da5b260e3c8b60e11", size = 385672, upload-time = "2024-10-16T11:24:54.832Z" }
+dependencies = [
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "tzdata", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a9/f1/0258a123c045afaf3c3b60c22ccff077bceeb24b8dc2c593270899353bd0/psycopg-3.2.10.tar.gz", hash = "sha256:0bce99269d16ed18401683a8569b2c5abd94f72f8364856d56c0389bcd50972a", size = 160380, upload-time = "2025-09-08T09:13:37.775Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/16/4623fad6076448df21c1a870c93a9774ad8a7b4dd1660223b59082dd8fec/psycopg2-2.9.10-cp312-cp312-win32.whl", hash = "sha256:65a63d7ab0e067e2cdb3cf266de39663203d38d6a8ed97f5ca0cb315c73fe067", size = 1025113, upload-time = "2024-10-16T11:18:40.148Z" },
-    { url = "https://files.pythonhosted.org/packages/66/de/baed128ae0fc07460d9399d82e631ea31a1f171c0c4ae18f9808ac6759e3/psycopg2-2.9.10-cp312-cp312-win_amd64.whl", hash = "sha256:4a579d6243da40a7b3182e0430493dbd55950c493d8c68f4eec0b302f6bbf20e", size = 1163951, upload-time = "2024-10-16T11:18:44.377Z" },
-    { url = "https://files.pythonhosted.org/packages/ae/49/a6cfc94a9c483b1fa401fbcb23aca7892f60c7269c5ffa2ac408364f80dc/psycopg2-2.9.10-cp313-cp313-win_amd64.whl", hash = "sha256:91fd603a2155da8d0cfcdbf8ab24a2d54bca72795b90d2a3ed2b6da8d979dee2", size = 2569060, upload-time = "2025-01-04T20:09:15.28Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/90/422ffbbeeb9418c795dae2a768db860401446af0c6768bc061ce22325f58/psycopg-3.2.10-py3-none-any.whl", hash = "sha256:ab5caf09a9ec42e314a21f5216dbcceac528e0e05142e42eea83a3b28b320ac3", size = 206586, upload-time = "2025-09-08T09:07:50.121Z" },
 ]
 
 [[package]]

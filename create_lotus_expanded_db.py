@@ -1,4 +1,3 @@
-import gc
 import os
 import typing as T
 
@@ -152,7 +151,6 @@ def main():
     del df
     df = create_dataframe_for_db(mols)
     del mols
-    gc.collect()
 
     conn = psycopg2.connect(
         database=os.getenv("LOTUS_DB_PGDATABASE"),
