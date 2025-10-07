@@ -1,17 +1,14 @@
 import typing as T
 
 import numpy as np
-import pandas as pd
-import polars as pl
-from cache_decorator import Cache
+from numba import njit
 from tqdm import tqdm
 
 
+@njit
 def get_fraction_of_true(
     scores: np.ndarray,
-    columns: T.List[str],
-    index: T.List[str],
-    id_to_inchikey: T.Dict[str, str],
+    true_column_index: np.ndarray,
     score_threshold=0.0,
 ) -> T.Tuple[float, float]:
     """
@@ -19,14 +16,15 @@ def get_fraction_of_true(
     where the score for the true compound is above the threshold
     """
     scores_smaller = scores.copy()
+    orig_shape = scores_smaller.shape
+    scores_smaller = scores_smaller.flatten()
     scores_smaller[scores_smaller < score_threshold] = np.nan
-    column_indices = {col: idx for idx, col in enumerate(columns)}
+    scores_smaller = scores_smaller.reshape(orig_shape)
 
     # we iterate over the rows of the array
     fraction_of_true_among_df = 0
-    for i, row in zip(index, scores_smaller):
-        column_index = column_indices[id_to_inchikey[i]]
-        if np.isnan(row[column_index]):
+    for i, row in zip(true_column_index, scores_smaller):
+        if np.isnan(row[i]):
             continue
         fraction_of_true_among_df += 1
 
@@ -76,12 +74,15 @@ def evaluate_fraction_of_true(
 ) -> T.Tuple[T.List[float], T.List[float]]:
     fraction_true_lst = []
     fraction_df_lst = []
+    column_indices = {col: idx for idx, col in enumerate(all_inchikeys)}
+    true_indices = np.array(
+        [column_indices[identifier_to_inchikey[i]] for i in identifiers]
+    )
+
     for threshold in tqdm(interval, desc="Thresholds"):
         fraction_true, fraction_df = get_fraction_of_true(
             scores,
-            all_inchikeys,
-            identifiers,
-            identifier_to_inchikey,
+            true_column_index=true_indices,
             score_threshold=threshold,
         )
         fraction_true_lst.append(fraction_true)

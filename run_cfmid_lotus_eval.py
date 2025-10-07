@@ -13,6 +13,8 @@ from ms2mol_evaluation.spectrum import Spectrum
 
 def main():
     download_isdb()
+    if os.path.exists("lotus_cfmid_scores.csv"):
+        os.remove("lotus_cfmid_scores.csv")
     massspecgym = load_massspecgym()
     spectra: T.List[Spectrum] = to_spectra(massspecgym)
     isdb: T.List[Spectrum] = load_isdb()
