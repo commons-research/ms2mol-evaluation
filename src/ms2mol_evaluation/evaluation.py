@@ -23,8 +23,6 @@ class Evaluation:
     def __init__(self, output_dir: Path) -> None:
         self.scores: NDArray[np.float16] = np.array([], dtype=np.float16)
         self.output_dir = output_dir
-        self.inchikeys_as_columns: T.List[str] = []
-        self.identifiers_as_rows: T.List[str] = []
         self.msg_df: pd.DataFrame = Evaluation._load_massspecgym()
         self.msg_spectra: T.List[Spectrum] = Evaluation._to_spectra(self.msg_df)
         self.isdb_spectra: T.List[Spectrum] = Evaluation._load_isdb()
@@ -113,7 +111,7 @@ class Evaluation:
 
         return fraction_true_lst, fraction_df_lst
 
-    def evaluate_top_n_of_true(
+    def evaluate_top_n(
         self,
         all_inchikeys: T.List[str],
         identifiers: T.List[str],
@@ -247,11 +245,8 @@ class Evaluation:
     def plot_results(self, x_axis, y_axis, interval, image_name: str) -> None:
         # Plotting
         ax = sns.scatterplot(x=x_axis, y=y_axis, hue=interval)
-        plt.xlabel("Fraction of all candidates that are not NaN")
-        plt.ylabel("Fraction of true candidates found")
-        plt.title(
-            "Fraction of true candidates found vs. Fraction of all candidates that are not NaN"
-        )
+        plt.xlabel("Fraction of values that are not NaN")
+        plt.ylabel("Fraction of rows where true compound is found")
         plt.axhline(y=1.0, color="red", linestyle="--")
         fig = ax.get_figure()
         fig.savefig(self.output_dir / image_name)
