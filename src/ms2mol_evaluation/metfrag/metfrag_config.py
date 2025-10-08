@@ -39,7 +39,6 @@ class MetFragConfig(Hashable):
 
         self._universal_params = {
             "PrecursorIonMode": adduct_to_int,
-            "FragmentPeakMatchRelativeMassDeviation": 5.0,
             "SampleName": str(results_file),
             "MetFragCandidateWriter": "CSV",
             "DatabaseSearchRelativeMassDeviation": 10.0,
