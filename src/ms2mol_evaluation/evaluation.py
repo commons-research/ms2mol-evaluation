@@ -1,38 +1,39 @@
 import typing as T
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import polars as pl
+import seaborn as sns
 from cache_decorator import Cache
 from downloaders import BaseDownloader
 from matchms.filtering import default_filters
 from matchms.importing import load_from_mgf
-from numba import njit
 from numpy.typing import NDArray
 from pandarallel import pandarallel
 from tqdm.auto import tqdm
 
-from ms2mol_evaluation.spectrum import Spectrum, convert_matchms_spectrum_to_spectrum
+from ms2mol_evaluation.spectrum import Spectrum
 
-pandarallel.initialize(progress_bar=True)
+pandarallel.initialize(progress_bar=False)
 
 
 class Evaluation:
     def __init__(self, output_dir: Path) -> None:
-        self.scores: NDArray[np.float32] = np.array([], dtype=np.float32)
+        self.scores: NDArray[np.float16] = np.array([], dtype=np.float16)
         self.output_dir = output_dir
         self.inchikeys_as_columns: T.List[str] = []
         self.identifiers_as_rows: T.List[str] = []
         self.msg_df: pd.DataFrame = Evaluation._load_massspecgym()
         self.msg_spectra: T.List[Spectrum] = Evaluation._to_spectra(self.msg_df)
         self.isdb_spectra: T.List[Spectrum] = Evaluation._load_isdb()
-        self.filtered_msg_spectra: bool = False
+        self.msg_is_filtered: bool = False
 
-    def get_scores(self) -> NDArray[np.float32]:
+    def get_scores(self) -> NDArray[np.float16]:
         return self.scores
 
-    def get_top_n(
+    def _get_top_n(
         self,
         columns: T.List[str],
         index: T.List[str],
@@ -63,8 +64,7 @@ class Evaluation:
         fraction_of_df = 1 - (np.isnan(scores_top_n).sum() / scores_top_n.size)
         return fraction_of_true, fraction_of_df
 
-    @njit
-    def get_fraction(
+    def _get_fraction(
         self,
         true_column_index: NDArray[np.int64],
         score_threshold=0.0,
@@ -74,10 +74,7 @@ class Evaluation:
         where the score for the true compound is above the threshold
         """
         scores_smaller = self.scores.copy()
-        orig_shape = scores_smaller.shape
-        scores_smaller = scores_smaller.flatten()
         scores_smaller[scores_smaller < score_threshold] = np.nan
-        scores_smaller = scores_smaller.reshape(orig_shape)
 
         # we iterate over the rows of the array
         fraction_of_true_among_df = 0
@@ -107,7 +104,7 @@ class Evaluation:
         )
 
         for threshold in tqdm(interval, desc="Thresholds"):
-            fraction_true, fraction_df = self.get_fraction(
+            fraction_true, fraction_df = self._get_fraction(
                 true_column_index=true_indices,
                 score_threshold=threshold,
             )
@@ -126,7 +123,7 @@ class Evaluation:
         fraction_true_lst = []
         fraction_df_lst = []
         for threshold in tqdm(interval, desc="Top N"):
-            fraction_true, fraction_df = self.get_top_n(
+            fraction_true, fraction_df = self._get_top_n(
                 all_inchikeys,
                 identifiers,
                 identifier_to_inchikey,
@@ -191,8 +188,14 @@ class Evaluation:
         ).tolist()
 
         converted_spectra = []
-        for s in spectra:
-            converted_spectra.append(convert_matchms_spectrum_to_spectrum.remote(s))
+        for s in tqdm(spectra, desc="Converting to custom Spectrum class"):
+            converted_spectra.append(
+                Spectrum(
+                    mz=s.mz,
+                    intensities=s.intensities,
+                    metadata=s.metadata,
+                )
+            )
         return converted_spectra
 
     @Cache()
@@ -238,5 +241,17 @@ class Evaluation:
                 s for s in filtered_spectra if s.get("adduct") == "[M+H]+"
             ]
 
-        self.filtered_msg_spectra = True
+        self.msg_is_filtered = True
         return filtered_spectra
+
+    def plot_results(self, x_axis, y_axis, interval, image_name: str) -> None:
+        # Plotting
+        ax = sns.scatterplot(x=x_axis, y=y_axis, hue=interval)
+        plt.xlabel("Fraction of all candidates that are not NaN")
+        plt.ylabel("Fraction of true candidates found")
+        plt.title(
+            "Fraction of true candidates found vs. Fraction of all candidates that are not NaN"
+        )
+        plt.axhline(y=1.0, color="red", linestyle="--")
+        fig = ax.get_figure()
+        fig.savefig(self.output_dir / image_name)

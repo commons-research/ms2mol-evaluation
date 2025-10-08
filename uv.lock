@@ -1475,7 +1475,7 @@ wheels = [
 
 [[package]]
 name = "matchms"
-version = "0.30.0"
+version = "0.31.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "deprecated" },
@@ -1486,7 +1486,6 @@ dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "pickydict" },
-    { name = "pillow" },
     { name = "pubchempy" },
     { name = "pynndescent" },
     { name = "pyteomics" },
@@ -1497,9 +1496,9 @@ dependencies = [
     { name = "sparsestack" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/c8/d1592d824cddafb07b2330a56ebf0aa6a90cad8f79bdaa8295b6b1d4dfa4/matchms-0.30.0.tar.gz", hash = "sha256:d2341df163ec0ec3c35010e629065a085640479985f39e68fea696eb737423b8", size = 120283, upload-time = "2025-05-26T19:58:38.574Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/20/e0/9a7e7ddbe1c20e069955868046f9f45e43b4fdf3bf0c9886143c23d9ab94/matchms-0.31.0.tar.gz", hash = "sha256:4f3178f58c6e3a82e71bb941f60f856f2475dacde96f66ca833caecac5012dec", size = 140231, upload-time = "2025-10-06T15:43:51.063Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/98/0f/f8a93355159d3e4b1d25f901e0d35f177e1d8538a9ed3db4303ea2bb0a85/matchms-0.30.0-py3-none-any.whl", hash = "sha256:4c84ecdd7424e5396f770f464bb5eaa5b992e44dcb84975a75fb4da811129bbd", size = 182892, upload-time = "2025-05-26T19:58:36.329Z" },
+    { url = "https://files.pythonhosted.org/packages/95/ea/c3cda010ac474eec352dd355db0a8408ad801d75163c3c42fb3abbbe6cf8/matchms-0.31.0-py3-none-any.whl", hash = "sha256:b07ab7c2b675b4a0e0d2dd362e8611389c2eca83ddf1b8309a1b22991bea8e1e", size = 204989, upload-time = "2025-10-06T15:43:49.697Z" },
 ]
 
 [[package]]
@@ -1691,7 +1690,7 @@ requires-dist = [
     { name = "downloaders", specifier = ">=1.0.22" },
     { name = "dreams", git = "https://github.com/mvisani/DreaMS" },
     { name = "ipywidgets", specifier = ">=8.1.7" },
-    { name = "matchms", specifier = ">=0.30.0" },
+    { name = "matchms", specifier = ">=0.31" },
     { name = "matplotlib", specifier = ">=3.10.3" },
     { name = "matplotlib-venn", specifier = ">=1.1.2" },
     { name = "numba", specifier = ">=0.61.2" },
@@ -2422,9 +2421,12 @@ wheels = [
 
 [[package]]
 name = "pubchempy"
-version = "1.0.4"
+version = "1.0.5"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/aa/fb/8de3aa9804b614dbc8dc5c16ed061d819cc360e0ddecda3dcd01c1552339/PubChemPy-1.0.4.tar.gz", hash = "sha256:24e9dc2fc90ab153b2764bf805e510b1410700884faf0510a9e7cf0d61d8ed0e", size = 29767, upload-time = "2017-04-11T18:36:23.649Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/30/a1/1b63d717a315b5fdc281e312bd02e9069e22ed8aa63a56d79f8dae95a1f2/pubchempy-1.0.5.tar.gz", hash = "sha256:08f0b2a82a5caa5d61e14935d655da554602d7b5686fe661ab584c882ffff623", size = 26814, upload-time = "2025-09-08T20:53:01.971Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6b/e3/2c887645f21b94d992a16775bcf81cdf6dcc36cf1606782cb2a3c86e9a35/pubchempy-1.0.5-py3-none-any.whl", hash = "sha256:e936cfed31fa194042ad463be3c803dde5b12ef2f795caf336e3114127c34fa0", size = 21355, upload-time = "2025-09-08T20:53:00.831Z" },
+]
 
 [[package]]
 name = "pure-eval"

@@ -12,7 +12,7 @@ dependencies = [
     "downloaders>=1.0.22",
     "dreams",
     "ipywidgets>=8.1.7",
-    "matchms>=0.30.0",
+    "matchms>=0.31",
     "matplotlib>=3.10.3",
     "matplotlib-venn>=1.1.2",
     "numba>=0.61.2",
