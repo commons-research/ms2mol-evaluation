@@ -1,10 +1,10 @@
 import os
 
-import psycopg2
+import psycopg
 from dotenv import load_dotenv
 from tqdm import tqdm
 
-from ms2mol_evaluation.lotus import (
+from ms2mol_evaluation.databases.lotus import (
     create_lotus_table_query,
     generate_index_query,
     generate_insert_query,
@@ -16,8 +16,8 @@ load_dotenv()
 
 def main():
     df = load_lotus_for_metfrag()
-    conn = psycopg2.connect(
-        database=os.getenv("LOTUS_DB_PGDATABASE"),
+    conn = psycopg.connect(
+        dbname=os.getenv("LOTUS_DB_PGDATABASE"),
         host=os.getenv("LOTUS_DB_PGHOST"),
         port=os.getenv("LOTUS_DB_PGPORT"),
         user=os.getenv("LOTUS_DB_POSTGRES_USER"),

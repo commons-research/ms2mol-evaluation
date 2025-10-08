@@ -1,7 +1,4 @@
 import pandas as pd
-from downloaders import BaseDownloader
-
-from ms2mol_evaluation.isdb import download_isdb, load_isdb
 
 
 def create_lotus_table_query():

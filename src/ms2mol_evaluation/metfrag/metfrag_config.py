@@ -5,8 +5,6 @@ from pathlib import Path
 from dict_hash import Hashable, sha256
 from dotenv import load_dotenv
 
-from ms2mol_evaluation.spectrum import Spectrum
-
 load_dotenv()
 ADDUCTS_TO_VALUE = {"[M+H]+": 1, "[M+Na]+": 23}
 
