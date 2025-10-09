@@ -99,7 +99,7 @@ class CFMEvaluation(Evaluation):
     def _create_scores_array(
         self, df: pd.DataFrame
     ) -> Tuple[List[str], List[str], Dict[str, str]]:
-        identifiers: List[str] = [s.get("identifier") for s in self.msg_spectra]
+        index: List[str] = [s.get("identifier") for s in self.msg_spectra]
         identifier_to_inchikey = {
             s.get("identifier"): s.get("inchikey") for s in self.msg_spectra
         }
@@ -121,7 +121,7 @@ class CFMEvaluation(Evaluation):
 
         return (
             all_inchikeys,
-            identifiers,
+            index,
             identifier_to_inchikey,
         )
 

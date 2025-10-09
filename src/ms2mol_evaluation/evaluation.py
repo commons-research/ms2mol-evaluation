@@ -16,8 +16,6 @@ from tqdm.auto import tqdm
 
 from ms2mol_evaluation.spectrum import Spectrum
 
-pandarallel.initialize(progress_bar=False)
-
 
 class Evaluation:
     def __init__(self, output_dir: Path) -> None:
@@ -133,6 +131,7 @@ class Evaluation:
         return fraction_true_lst, fraction_df_lst
 
     @staticmethod
+    @Cache()
     def _load_massspecgym() -> pd.DataFrame:
         """
         Load the MassSpecGym dataset.
@@ -179,7 +178,11 @@ class Evaluation:
         )
 
     @staticmethod
+    @Cache(
+        use_approximated_hash=True,
+    )
     def _to_spectra(df: pd.DataFrame) -> T.List[Spectrum]:
+        pandarallel.initialize(progress_bar=False)
         # Apply to_spectrum + default_filters in parallel
         spectra = df.parallel_apply(
             lambda row: default_filters(Evaluation._to_spectrum(row)), axis=1
@@ -248,6 +251,7 @@ class Evaluation:
         ax.set_title("Evaluation Results")
         ax.set_xlabel("Fraction of values that are not NaN")
         ax.set_ylabel("Fraction of rows where true compound is not NaN")
+        ax.set_ylim(0, 1.1)
         ax.legend(title="Threshold")
         ax.axhline(y=1.0, color="red", linestyle="--")
         fig = ax.get_figure()
