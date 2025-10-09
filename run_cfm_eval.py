@@ -2,7 +2,7 @@ from pathlib import Path
 
 from matchms.similarity import FlashSimilarity
 
-from ms2mol_evaluation.cfm_eval import CFMEvaluation
+from ms2mol_evaluation import CFMEvaluation
 
 
 def main():
