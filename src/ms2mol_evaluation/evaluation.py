@@ -247,9 +247,10 @@ class Evaluation:
         ax = sns.scatterplot(x=x_axis, y=y_axis, hue=interval)
         ax.set_title("Evaluation Results")
         ax.set_xlabel("Fraction of values that are not NaN")
-        ax.set_ylabel("Fraction of rows where true compound is found")
+        ax.set_ylabel("Fraction of rows where true compound is not NaN")
         ax.legend(title="Threshold")
         ax.axhline(y=1.0, color="red", linestyle="--")
         fig = ax.get_figure()
         fig.savefig(self.output_dir / image_name)
-        del ax
+        plt.close(fig)
+        del ax, fig
