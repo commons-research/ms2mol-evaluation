@@ -6,6 +6,12 @@ resolution-markers = [
     "sys_platform != 'linux'",
 ]
 
+[manifest]
+members = [
+    "fiora",
+    "ms2mol-evaluation",
+]
+
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
@@ -109,6 +115,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/95/7d/4c1bd541d4dffa1b52bd83fb8527089e097a106fc90b467a7313b105f840/anyio-4.9.0.tar.gz", hash = "sha256:673c0c244e15788651a4ff38710fea9675823028a6f08a5eda409e0c9840a028", size = 190949, upload-time = "2025-03-17T00:02:54.77Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a1/ee/48ca1a7c89ffec8b6a0c5d02b89c305671d5ffd8d3c94acf8b8c408575bb/anyio-4.9.0-py3-none-any.whl", hash = "sha256:9f76d541cad6e36af7beb62e978876f3b41e3e04f2c1fbf0884604c0a9c4d93c", size = 100916, upload-time = "2025-03-17T00:02:52.713Z" },
+]
+
+[[package]]
+name = "appdirs"
+version = "1.4.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41", size = 13470, upload-time = "2020-05-11T07:59:51.037Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/00/2344469e2084fb287c2e0b57b72910309874c3245463acd6cf5e3db69324/appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128", size = 9566, upload-time = "2020-05-11T07:59:49.499Z" },
 ]
 
 [[package]]
@@ -633,12 +648,59 @@ wheels = [
 ]
 
 [[package]]
+name = "fastobo"
+version = "0.13.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/29/db8cb028855907b06faa360fdefe6412879f279f00e31e3153940411a8b1/fastobo-0.13.0.tar.gz", hash = "sha256:c4548bcfb7f9f87188bf5d8e4c7fd530162707265a8d644ee75259d305cd6964", size = 1727619, upload-time = "2025-02-14T00:41:30.66Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d3/6f/b0a8ee13ae25f74245301702f881e37959c2558cf261632ba027d66cf375/fastobo-0.13.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:80fe72f334801e9815ba59565210501a8f614283c4d8b6151b63ffa9aef3167a", size = 2047072, upload-time = "2025-02-14T00:40:41.826Z" },
+    { url = "https://files.pythonhosted.org/packages/89/a7/9396bbdd7e6ce2b34cf93aec67b5d24b18544a84fd4156f6b4fb335b38b7/fastobo-0.13.0-cp312-cp312-macosx_12_0_x86_64.whl", hash = "sha256:c3d457ce4b54686f299811b921b3ce9ad4d25bb6cdd72a71bbe4bcad56693543", size = 2179951, upload-time = "2025-02-14T00:40:44.274Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/6b/6811dc6a70ef171e2fbf151afafcfb72fc7b38637ab7c6f5126ff353f11d/fastobo-0.13.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8c389fa99ca7a941cde2f72743a12dbc586be73a6ebc0b84f0fa7b7651892ccc", size = 2174960, upload-time = "2025-02-14T00:40:46.197Z" },
+    { url = "https://files.pythonhosted.org/packages/89/13/1cc46d1de10c9bf17b1e6f065c5af5e381ba6aaa5bfcd16b83e7c467b1b0/fastobo-0.13.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4d525e3fe1ca321a1a59671947827fb431822f5f7a467aa03f22d86437505bb1", size = 2242121, upload-time = "2025-02-14T00:40:48.537Z" },
+    { url = "https://files.pythonhosted.org/packages/ce/8a/76373596e08369c53812ffc480b77a8ce586aa44ccd65f119554169e9901/fastobo-0.13.0-cp312-cp312-win_amd64.whl", hash = "sha256:72572abcea0c01bc7c004553ac3fa80df8938be1013f7a514701b13d89f788a1", size = 2203225, upload-time = "2025-02-14T00:40:50.064Z" },
+    { url = "https://files.pythonhosted.org/packages/7b/17/48ce1fba67533d509eed91e617c9cc6d233992b526b047ba74c7f4831aa1/fastobo-0.13.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:7ad230422eec31aa668081a9cdd0030058ed200e79181f132c74536fbe7f066b", size = 2046218, upload-time = "2025-02-14T00:40:52.656Z" },
+    { url = "https://files.pythonhosted.org/packages/81/a1/bb734cf8b355dba2f917d02045c4f21e951bbc73ff1732d2f23af7833eea/fastobo-0.13.0-cp313-cp313-macosx_12_0_x86_64.whl", hash = "sha256:ff01175bb43745c089b4249e18af15d9955b31a88dd6ba69f63ad25161d80175", size = 2178740, upload-time = "2025-02-14T00:40:55.227Z" },
+    { url = "https://files.pythonhosted.org/packages/75/7a/7fb763fe0d6dfff2ccf1a7f3ed6c59ceaa07c407fd1c2b4df31cddf76537/fastobo-0.13.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:728014987eff7c3e05249b3ea59830fb9cb24293947c9a05a85f21853baa4304", size = 2174457, upload-time = "2025-02-14T00:40:57.819Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/a1/4d0f66af8f80b7cc64dcee196eeadb0caa5f16322bb4c4790d15682f1380/fastobo-0.13.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:65885c095c2260e011cfbca197ee68710e6cc3cb31bdc6d470b0ae5c8382de2b", size = 2241671, upload-time = "2025-02-14T00:40:59.471Z" },
+    { url = "https://files.pythonhosted.org/packages/4e/7f/29c135a5ed6d8b391d2f56501f8ffce5c6d5963aa54c059cbb85ef25c715/fastobo-0.13.0-cp313-cp313-win_amd64.whl", hash = "sha256:ffa708db4157c40f8ff61edc228f5bfae30f88b8d96d3d3ea4a1f0eb01cba474", size = 2202928, upload-time = "2025-02-14T00:41:01.128Z" },
+]
+
+[[package]]
 name = "filelock"
 version = "3.18.0"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/0a/10/c23352565a6544bdc5353e0b15fc1c563352101f30e24bf500207a54df9a/filelock-3.18.0.tar.gz", hash = "sha256:adbc88eabb99d2fec8c9c1b229b171f18afa655400173ddc653d5d01501fb9f2", size = 18075, upload-time = "2025-03-14T07:11:40.47Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4d/36/2a115987e2d8c300a974597416d9de88f2444426de9571f4b59b2cca3acc/filelock-3.18.0-py3-none-any.whl", hash = "sha256:c401f4f8377c4464e6db25fff06205fd89bdd83b65eb0488ed1b160f780e21de", size = 16215, upload-time = "2025-03-14T07:11:39.145Z" },
+]
+
+[[package]]
+name = "fiora"
+version = "0.0.1"
+source = { editable = "fiora" }
+dependencies = [
+    { name = "dill" },
+    { name = "numpy" },
+    { name = "rdkit" },
+    { name = "seaborn" },
+    { name = "setuptools" },
+    { name = "spectrum-utils" },
+    { name = "torch" },
+    { name = "torch-geometric" },
+    { name = "treelib" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "dill" },
+    { name = "numpy" },
+    { name = "rdkit" },
+    { name = "seaborn" },
+    { name = "setuptools", specifier = ">=24.2.0" },
+    { name = "spectrum-utils" },
+    { name = "torch" },
+    { name = "torch-geometric" },
+    { name = "treelib" },
 ]
 
 [[package]]
@@ -1362,6 +1424,15 @@ wheels = [
 ]
 
 [[package]]
+name = "lark"
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/37/a13baf0135f348af608c667633cbe5d13aa2c5c15a56ae9ad3e6cba45ae3/lark-1.3.0.tar.gz", hash = "sha256:9a3839d0ca5e1faf7cfa3460e420e859b66bcbde05b634e73c369c8244c5fa48", size = 259551, upload-time = "2025-09-22T13:45:05.072Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a8/3e/1c6b43277de64fc3c0333b0e72ab7b52ddaaea205210d60d9b9f83c3d0c7/lark-1.3.0-py3-none-any.whl", hash = "sha256:80661f261fb2584a9828a097a2432efd575af27d20be0fd35d17f0fe37253831", size = 113002, upload-time = "2025-09-22T13:45:03.747Z" },
+]
+
+[[package]]
 name = "lightning-utilities"
 version = "0.14.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1658,6 +1729,7 @@ dependencies = [
     { name = "cache-decorator" },
     { name = "downloaders" },
     { name = "dreams" },
+    { name = "fiora" },
     { name = "ipywidgets" },
     { name = "matchms" },
     { name = "matplotlib" },
@@ -1689,6 +1761,7 @@ requires-dist = [
     { name = "cache-decorator", specifier = ">=2.2.0" },
     { name = "downloaders", specifier = ">=1.0.22" },
     { name = "dreams", git = "https://github.com/mvisani/DreaMS" },
+    { name = "fiora", editable = "fiora" },
     { name = "ipywidgets", specifier = ">=8.1.7" },
     { name = "matchms", specifier = ">=0.31" },
     { name = "matplotlib", specifier = ">=3.10.3" },
@@ -3165,6 +3238,24 @@ wheels = [
 ]
 
 [[package]]
+name = "spectrum-utils"
+version = "0.4.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "appdirs" },
+    { name = "fastobo" },
+    { name = "lark" },
+    { name = "matplotlib" },
+    { name = "numba" },
+    { name = "numpy" },
+    { name = "pyteomics" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f2/57/faf4e0484f32e970a534bd18b35a968a98a8712371a057791253c1e9a21d/spectrum_utils-0.4.2.tar.gz", hash = "sha256:7a0212f12b6770c592184f4e82f4b7bb1f110b4db2a3b914a1b4b2f3f8c79693", size = 1041420, upload-time = "2023-04-26T07:47:40.436Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/9f/55f99400153ef28a4100b28ef985031a8b81df2f097c92c9ea48d1b6f38d/spectrum_utils-0.4.2-py3-none-any.whl", hash = "sha256:db2e1e7ecd85b8b9c6b87b6d8633083fa64d4900dd0ddf8fee94e8295aa22283", size = 45503, upload-time = "2023-04-26T07:47:38.298Z" },
+]
+
+[[package]]
 name = "stack-data"
 version = "0.6.3"
 source = { registry = "https://pypi.org/simple" }
@@ -3296,6 +3387,25 @@ wheels = [
 ]
 
 [[package]]
+name = "torch-geometric"
+version = "2.6.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "fsspec" },
+    { name = "jinja2" },
+    { name = "numpy" },
+    { name = "psutil" },
+    { name = "pyparsing" },
+    { name = "requests" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e8/81/e1b015494cb9e0bf4c47cc8426e49736120248733be0e22072a5628ae9ed/torch_geometric-2.6.1.tar.gz", hash = "sha256:1f18f9d0fc4d2239d526221e4f22606a4a3895b5d965a9856d27610a3df662c6", size = 771490, upload-time = "2024-09-26T08:11:30.25Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/03/9f/157e913626c1acfb3b19ce000b1a6e4e4fb177c0bc0ea0c67ca5bd714b5a/torch_geometric-2.6.1-py3-none-any.whl", hash = "sha256:8faeb353f9655f7dbec44c5e0b44c721773bdfb279994da96b9b8b12fd30f427", size = 1135632, upload-time = "2024-09-26T08:11:27.194Z" },
+]
+
+[[package]]
 name = "torchmetrics"
 version = "1.7.4"
 source = { registry = "https://pypi.org/simple" }
@@ -3348,6 +3458,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/eb/79/72064e6a701c2183016abbbfedaba506d81e30e232a68c9f0d6f6fcd1574/traitlets-5.14.3.tar.gz", hash = "sha256:9ed0579d3502c94b4b3732ac120375cda96f923114522847de4b3bb98b96b6b7", size = 161621, upload-time = "2024-04-19T11:11:49.746Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl", hash = "sha256:b74e89e397b1ed28cc831db7aea759ba6640cb3de13090ca145426688ff1ac4f", size = 85359, upload-time = "2024-04-19T11:11:46.763Z" },
+]
+
+[[package]]
+name = "treelib"
+version = "1.8.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7a/31/145bdbee73d7ee4ac4e879c37faa196a32208b288ca4f308c1ad8db3f010/treelib-1.8.0.tar.gz", hash = "sha256:e1be2c6b66ffbfae85079fc4c76fb4909946d01d915ee29ff6795de53aed5d55", size = 28607, upload-time = "2025-06-29T15:06:49.293Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2e/24/32361f5d0e2eff7ff1881ac6833b6b090cfe34515b1ee9082636cbe69442/treelib-1.8.0-py3-none-any.whl", hash = "sha256:5235d1ebf988c5026f26ce6e5e0cd470007f16d4978185f5c9b3eee8a25aef81", size = 30728, upload-time = "2025-06-29T15:06:48.248Z" },
 ]
 
 [[package]]

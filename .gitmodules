@@ -1,0 +1,3 @@
+[submodule "fiora"]
+	path = fiora
+	url = git@github.com:BAMeScience/fiora.git

@@ -11,6 +11,7 @@ dependencies = [
     "cache-decorator>=2.2.0",
     "downloaders>=1.0.22",
     "dreams",
+    "fiora",
     "ipywidgets>=8.1.7",
     "matchms>=0.31",
     "matplotlib>=3.10.3",
@@ -44,3 +45,9 @@ dev = [
 
 [tool.uv.sources]
 dreams = { git = "https://github.com/mvisani/DreaMS" }
+fiora = { workspace = true }
+
+[tool.uv.workspace]
+members = [
+    "fiora",
+]
