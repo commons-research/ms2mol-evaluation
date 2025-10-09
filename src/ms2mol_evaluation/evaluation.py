@@ -1,5 +1,6 @@
 import typing as T
 from pathlib import Path
+from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,7 +19,9 @@ from ms2mol_evaluation.spectrum import Spectrum
 
 
 class Evaluation:
-    def __init__(self, output_dir: Path) -> None:
+    def __init__(self, output_dir: Union[Path, str]) -> None:
+        if isinstance(output_dir, str):
+            output_dir = Path(output_dir)
         self.scores: NDArray[np.float16] = np.array([], dtype=np.float16)
         self.output_dir = output_dir
         self.msg_df: pd.DataFrame = Evaluation._load_massspecgym()

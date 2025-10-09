@@ -2,30 +2,38 @@ import os
 import subprocess
 import typing as T
 from pathlib import Path
-from typing import cast
+from typing import Dict, Iterable, List, Tuple, Union
 
+import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from matchms import Spectrum as MatchMSSpectrum
 from matchms.exporting import save_as_mgf
+from tqdm.auto import tqdm
 
 from ms2mol_evaluation.evaluation import Evaluation
+from ms2mol_evaluation.sirius.constants import (
+    SIRIUS_ORBITRAP_COMMAND,
+    SIRIUS_QTOF_COMMAND,
+)
 from ms2mol_evaluation.spectrum import Spectrum
 
 load_dotenv()
 
 
 class SiriusEvaluation(Evaluation):
-    def __init__(self, output_dir: Path) -> None:
+    def __init__(self, output_dir: Union[Path, str]) -> None:
         super().__init__(output_dir)
         self.sirius_executable = os.getenv("SIRIUS_PATH")
-        if not output_dir.exists():
-            output_dir.mkdir(parents=True, exist_ok=True)
+        if not self.output_dir.exists():
+            self.output_dir.mkdir(parents=True, exist_ok=True)
         self.msg_spectra = self._filter_massspecgym_spectra(hydrogen_adduct_only=True)
         self._add_required_metadata_for_sirius()
         self._split_orbitrap_qtof()
-        self._save_mgf_file(self.msg_orbitrap, self.output_dir / "sirius_orbitrap.mgf")
-        self._save_mgf_file(self.msg_qtof, self.output_dir / "sirius_qtof.mgf")
+        self.orbitrap_mgf_path = self.output_dir / "sirius_orbitrap.mgf"
+        self.qtof_mgf_path = self.output_dir / "sirius_qtof.mgf"
+        self._save_mgf_file(self.msg_orbitrap, self.orbitrap_mgf_path)
+        self._save_mgf_file(self.msg_qtof, self.qtof_mgf_path)
         self._write_custom_db()
         self._create_custom_db()
 
@@ -84,5 +92,114 @@ class SiriusEvaluation(Evaluation):
         subprocess.run(create_command, check=True)
         subprocess.run(import_command, check=True)
 
+    def _create_command(self, mgf_path: Path, is_orbitrap: bool) -> T.List[str]:
+        sirius_command = []
+        sirius_command.append(self.sirius_executable)
+        sirius_command.append("--input")
+        sirius_command.append(str(mgf_path))
+        sirius_command.append("--output")
+        sirius_command.append(str(mgf_path.stem))
+        # we take the sirius orbitrap constant and split it by spaces
+        if is_orbitrap:
+            sirius_command.extend(SIRIUS_ORBITRAP_COMMAND.split())
+        else:
+            sirius_command.extend(SIRIUS_QTOF_COMMAND.split())
+        return sirius_command
+
     def run_eval(self) -> pd.DataFrame:
-        raise NotImplementedError("SiriusEvaluation is not implemented yet.")
+        orbi_command = self._create_command(self.orbitrap_mgf_path, True)
+        qtof_command = self._create_command(self.qtof_mgf_path, False)
+
+        subprocess.run(orbi_command, check=True)
+        subprocess.run(qtof_command, check=True)
+
+        sirius_orbi = pd.read_csv(
+            self.orbitrap_mgf_path.stem + "structure_identifications_all.tsv",
+            sep="\t",
+        )
+        sirius_orbi["instrument_type"] = "Orbitrap"
+        sirius_qtof = pd.read_csv(
+            self.qtof_mgf_path.stem + "structure_identifications_all.tsv",
+            sep="\t",
+        )
+        sirius_qtof["instrument_type"] = "QTOF"
+        return pd.concat([sirius_orbi, sirius_qtof], ignore_index=True)
+
+    def _create_scores_array(
+        self,
+        df: pd.DataFrame,
+    ) -> Tuple[List[str], List[str], Dict[str, str]]:
+        mass_spec_gym = self._load_massspecgym()
+        identifier_to_inchikey = {}
+        for msg_id, msg_inchikey in zip(mass_spec_gym.index, mass_spec_gym.inchikey):
+            identifier_to_inchikey[msg_id] = msg_inchikey
+
+        del mass_spec_gym
+
+        df["true_inchikey"] = df["mappingFeatureId"].map(identifier_to_inchikey)
+        index: T.List[str] = [s.get("identifier") for s in self.msg_spectra]
+        identifier_to_inchikey = {
+            s.get("identifier"): s.get("inchikey") for s in self.msg_spectra
+        }
+        id_to_int = {s.get("identifier"): i for i, s in enumerate(self.msg_spectra)}
+        all_inchikeys = sorted(set(s.get("compound_name") for s in self.isdb_spectra))
+        inchi_to_int = {inchk: i for i, inchk in enumerate(all_inchikeys)}
+
+        self.scores = np.empty(
+            (len(index), len(all_inchikeys)),
+            dtype=np.float16,
+        )
+        self.scores.fill(np.nan)
+
+        for i, row in tqdm(df.iterrows(), total=len(df), desc="Filling scores"):
+            identifier = row["mappingFeatureId"]
+            inchikey = row["InChIkey2D"]
+            if identifier not in id_to_int or inchikey not in inchi_to_int:
+                continue
+            self.scores[id_to_int[identifier], inchi_to_int[inchikey]] = row[
+                "CSI:FingerIDScore"
+            ]
+
+        return (
+            all_inchikeys,
+            index,
+            identifier_to_inchikey,
+        )
+
+    def get_fraction_results(
+        self,
+        df: pd.DataFrame,
+        interval: Iterable[float] = np.arange(0.0, 1.0, 0.05),
+    ) -> None:
+        (
+            all_inchikeys,
+            index,
+            identifier_to_inchikey,
+        ) = self._create_scores_array(df)
+
+        y_fraction, x_fraction = self.evaluate_fraction(
+            all_inchikeys=all_inchikeys,
+            identifiers=index,
+            identifier_to_inchikey=identifier_to_inchikey,
+            interval=interval,
+        )
+
+        self.plot_results(x_fraction, y_fraction, interval, image_name="fraction.png")
+
+    def get_top_n_results(
+        self,
+        df: pd.DataFrame,
+        interval: Iterable[int] = [1, 2, 5, 10, 20, 50, 100, 200, 500],
+    ) -> None:
+        (
+            all_inchikeys,
+            index,
+            identifier_to_inchikey,
+        ) = self._create_scores_array(df)
+        y_top_n, x_top_n = self.evaluate_top_n(
+            all_inchikeys=all_inchikeys,
+            identifiers=index,
+            identifier_to_inchikey=identifier_to_inchikey,
+            interval=interval,
+        )
+        self.plot_results(x_top_n, y_top_n, interval, image_name="top_n.png")
