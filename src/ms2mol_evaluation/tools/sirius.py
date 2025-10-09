@@ -2,9 +2,11 @@ import os
 import subprocess
 import typing as T
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
 from dotenv import load_dotenv
+from matchms import Spectrum as MatchMSSpectrum
 from matchms.exporting import save_as_mgf
 
 from ms2mol_evaluation.evaluation import Evaluation
@@ -25,6 +27,7 @@ class SiriusEvaluation(Evaluation):
         self._save_mgf_file(self.msg_orbitrap, self.output_dir / "sirius_orbitrap.mgf")
         self._save_mgf_file(self.msg_qtof, self.output_dir / "sirius_qtof.mgf")
         self._write_custom_db()
+        self._create_custom_db()
 
     def _save_mgf_file(self, spectra: T.List[Spectrum], file_path: Path) -> None:
         save_as_mgf(spectra, str(file_path), file_mode="w")
@@ -80,3 +83,6 @@ class SiriusEvaluation(Evaluation):
         ]
         subprocess.run(create_command, check=True)
         subprocess.run(import_command, check=True)
+
+    def run_eval(self) -> pd.DataFrame:
+        raise NotImplementedError("SiriusEvaluation is not implemented yet.")

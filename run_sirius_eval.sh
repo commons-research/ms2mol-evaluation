@@ -13,7 +13,7 @@ sirius --input data/sirius/sirius_orbitrap.mgf \
     --AdductSettings.prioritizeInputFileAdducts=true \
     --UseHeuristic.useHeuristicAboveMz=300 \
     --IsotopeMs2Settings=IGNORE \
-    --MS2MassDeviation.allowedMassDeviation=10.0ppm \
+    --MS2MassDeviation.allowedMassDeviation=0.01Da \
     --IdentitySearchSettings.precursorDeviation=10.0ppm \
     --FormulaSearchSettings.performDeNovoBelowMz=400.0 \
     --FormulaSearchSettings.applyFormulaConstraintsToDatabaseCandidates=false \
@@ -48,7 +48,7 @@ sirius \
     --AdductSettings.prioritizeInputFileAdducts=true \
     --UseHeuristic.useHeuristicAboveMz=300 \
     --IsotopeMs2Settings=IGNORE \
-    --MS2MassDeviation.allowedMassDeviation=10.0ppm \
+    --MS2MassDeviation.allowedMassDeviation=0.01Da \
     --IdentitySearchSettings.precursorDeviation=10.0ppm \
     --FormulaSearchSettings.performDeNovoBelowMz=400.0 \
     --FormulaSearchSettings.applyFormulaConstraintsToDatabaseCandidates=false \
