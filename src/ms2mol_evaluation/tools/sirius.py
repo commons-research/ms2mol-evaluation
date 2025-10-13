@@ -96,9 +96,9 @@ class SiriusEvaluation(Evaluation):
         sirius_command = []
         sirius_command.append(self.sirius_executable)
         sirius_command.append("--input")
-        sirius_command.append(str(mgf_path))
+        sirius_command.append(str(mgf_path.resolve()))
         sirius_command.append("--output")
-        sirius_command.append(str(mgf_path.stem))
+        sirius_command.append(str(mgf_path.resolve().with_suffix(".sirius")))
         # we take the sirius orbitrap constant and split it by spaces
         if is_orbitrap:
             sirius_command.extend(SIRIUS_ORBITRAP_COMMAND.split())
@@ -114,12 +114,14 @@ class SiriusEvaluation(Evaluation):
         subprocess.run(qtof_command, check=True)
 
         sirius_orbi = pd.read_csv(
-            self.orbitrap_mgf_path.stem + "structure_identifications_all.tsv",
+            self.orbitrap_mgf_path.resolve().with_suffix("")
+            / "structure_identifications_all.tsv",
             sep="\t",
         )
         sirius_orbi["instrument_type"] = "Orbitrap"
         sirius_qtof = pd.read_csv(
-            self.qtof_mgf_path.stem + "structure_identifications_all.tsv",
+            self.qtof_mgf_path.resolve().with_suffix("")
+            / "structure_identifications_all.tsv",
             sep="\t",
         )
         sirius_qtof["instrument_type"] = "QTOF"
@@ -169,7 +171,18 @@ class SiriusEvaluation(Evaluation):
     def get_fraction_results(
         self,
         df: pd.DataFrame,
-        interval: Iterable[float] = np.arange(0.0, 1.0, 0.05),
+        interval: Iterable[float] = [
+            -2000,
+            -1000,
+            -500,
+            -200,
+            -100,
+            -50,
+            -20,
+            -10,
+            -5,
+            0,
+        ],
     ) -> None:
         (
             all_inchikeys,
