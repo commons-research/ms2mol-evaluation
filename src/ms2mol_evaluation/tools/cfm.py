@@ -20,9 +20,9 @@ class CFMEvaluation(Evaluation):
         precursor_mz_tolerance_type: Literal["Dalton", "ppm"] = "ppm",
     ) -> None:
         # if the output dir path doesn't exist create all necessary directories
-        if not output_dir.exists():
-            output_dir.mkdir(parents=True, exist_ok=True)
         super().__init__(output_dir)
+        if not self.output_dir.exists():
+            self.output_dir.mkdir(parents=True, exist_ok=True)
         self.df_file_path = self.output_dir / "cfmid_scores.csv"
         if os.path.exists(self.df_file_path):
             os.remove(self.df_file_path)

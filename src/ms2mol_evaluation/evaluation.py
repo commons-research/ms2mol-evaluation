@@ -22,8 +22,9 @@ class Evaluation:
     def __init__(self, output_dir: Union[Path, str]) -> None:
         if isinstance(output_dir, str):
             output_dir = Path(output_dir)
-        self.scores: NDArray[np.float16] = np.array([], dtype=np.float16)
         self.output_dir = output_dir
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.scores: NDArray[np.float16] = np.array([], dtype=np.float16)
         self.msg_df: pd.DataFrame = Evaluation._load_massspecgym()
         self.msg_spectra: T.List[Spectrum] = Evaluation._to_spectra(self.msg_df)
         self.isdb_spectra: T.List[Spectrum] = Evaluation._load_isdb()
@@ -225,6 +226,28 @@ class Evaluation:
             )
             spectra.append(spectrum)
 
+        spectra = [
+            s for s in spectra if "C" in s.get("smiles") or "c" in s.get("smiles")
+        ]
+        # keep only spectra that have the following atoms : ['Br', 'C', 'Cl', 'F', 'I', 'N', 'O', 'P', 'S']
+        allowed_atoms = {"Br", "C", "Cl", "F", "I", "N", "O", "P", "S"}
+
+        def has_only_allowed_atoms(smiles: str) -> bool:
+            from rdkit import Chem
+
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None:
+                return False
+            atoms = {atom.GetSymbol() for atom in mol.GetAtoms()}
+            return atoms.issubset(allowed_atoms)
+
+        spectra = [s for s in spectra if has_only_allowed_atoms(s.get("smiles"))]
+        # filter spectra with precursor_mz < 1000
+        spectra = [
+            s
+            for s in spectra
+            if s.get("precursor_mz") < 1000 and s.get("precursor_mz") > 20
+        ]
         return spectra
 
     def _filter_massspecgym_spectra(

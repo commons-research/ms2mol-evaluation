@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 def create_lotus_table_query():
     query = """
 DROP TABLE IF EXISTS lotus;
