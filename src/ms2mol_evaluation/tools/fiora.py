@@ -29,7 +29,7 @@ class FioraEvaluation(Evaluation):
         precursor_mz_tolerance_type: Literal["Dalton", "ppm"] = "ppm",
     ) -> None:
         super().__init__(output_dir)
-        self.df_file_path = self.output_dir / "cfmid_scores.csv"
+        self.df_file_path = self.output_dir / "fiora_scores.csv"
         self.msg_spectra = self._filter_massspecgym_spectra(hydrogen_adduct_only=True)
         self.fiora_df = self._create_fiora_df()
         self.isdb_spectra = FioraEvaluation._create_fiora_isdb(

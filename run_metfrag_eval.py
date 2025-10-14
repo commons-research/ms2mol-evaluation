@@ -10,7 +10,7 @@ def main():
         Path("evaluations/metfrag_lotus"),
     )
 
-    res = eval.run_eval(n_jobs=64)
+    res = eval.run_eval(n_jobs=8)
     eval.get_fraction_results(res)
     eval.get_top_n_results(res)
 
