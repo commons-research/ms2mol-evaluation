@@ -6,12 +6,6 @@ resolution-markers = [
     "sys_platform != 'linux'",
 ]
 
-[manifest]
-members = [
-    "fiora",
-    "ms2mol-evaluation",
-]
-
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
@@ -676,27 +670,14 @@ wheels = [
 
 [[package]]
 name = "fiora"
-version = "0.0.1"
-source = { editable = "fiora" }
+version = "1.0.1"
+source = { git = "https://github.com/BAMeScience/fiora#94ec85e249426a5e165d62d1fafbdef67d8c5aca" }
 dependencies = [
     { name = "dill" },
+    { name = "ipython" },
     { name = "numpy" },
     { name = "rdkit" },
     { name = "seaborn" },
-    { name = "setuptools" },
-    { name = "spectrum-utils" },
-    { name = "torch" },
-    { name = "torch-geometric" },
-    { name = "treelib" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "dill" },
-    { name = "numpy" },
-    { name = "rdkit" },
-    { name = "seaborn" },
-    { name = "setuptools", specifier = ">=24.2.0" },
     { name = "spectrum-utils" },
     { name = "torch" },
     { name = "torch-geometric" },
@@ -1761,7 +1742,7 @@ requires-dist = [
     { name = "cache-decorator", specifier = ">=2.2.0" },
     { name = "downloaders", specifier = ">=1.0.22" },
     { name = "dreams", git = "https://github.com/mvisani/DreaMS" },
-    { name = "fiora", editable = "fiora" },
+    { name = "fiora", git = "https://github.com/BAMeScience/fiora" },
     { name = "ipywidgets", specifier = ">=8.1.7" },
     { name = "matchms", specifier = ">=0.31" },
     { name = "matplotlib", specifier = ">=3.10.3" },
