@@ -6,7 +6,7 @@ import pandas as pd
 import ray
 from cache_decorator import Cache
 
-from ms2mol_evaluation.metfrag_config import MetFragConfig
+from ms2mol_evaluation.metfrag.metfrag_config import MetFragConfig
 from ms2mol_evaluation.spectrum import Spectrum
 
 
