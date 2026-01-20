@@ -140,10 +140,10 @@ class Evaluation:
         """
         Load the MassSpecGym dataset.
         """
-        df = df = pl.read_csv(
+        df = pd.read_csv(
             "hf://datasets/roman-bushuiev/MassSpecGym/data/MassSpecGym.tsv",
-            separator="\t",
-        ).to_pandas()
+            sep="\t",
+        )
         df = df.set_index("identifier")
         df["mzs"] = df["mzs"].map(Evaluation._parse_spec_array)
         df["intensities"] = df["intensities"].map(Evaluation._parse_spec_array)
@@ -193,7 +193,11 @@ class Evaluation:
         ).tolist()
 
         converted_spectra = []
-        for s in tqdm(spectra, desc="Converting to custom Spectrum class"):
+        for s in tqdm(
+            spectra,
+            desc="Converting to custom Spectrum class",
+            leave=False,
+        ):
             converted_spectra.append(
                 Spectrum(
                     mz=s.mz,
