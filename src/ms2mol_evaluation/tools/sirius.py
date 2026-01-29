@@ -46,6 +46,9 @@ class SiriusEvaluation(Evaluation):
             s.set("formula", None)
             s.set("precursor_formula", None)
             s.set("feature_id", s.get("identifier"))
+            # only positive charges in current version of MassSpecGym
+            s.set("charge", "1+")
+            s.set("pepmass", s.get("precursor_mz"))
 
     def _split_orbitrap_qtof(self) -> None:
         self.msg_orbitrap = [
