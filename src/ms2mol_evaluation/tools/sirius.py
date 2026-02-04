@@ -82,7 +82,7 @@ class SiriusEvaluation(Evaluation):
             "custom-db",
             "create",
             "--name=lotusISDB",
-            f"--location={str((self.output_dir / "lotusISDB.siriusdb").resolve())}",
+            f"--location={str((self.output_dir / 'lotusISDB.siriusdb').resolve())}",
         ]
 
         import_command = [
