@@ -27,7 +27,7 @@ class SiriusEvaluation(Evaluation):
         self.sirius_executable = os.getenv("SIRIUS_PATH")
         if not self.output_dir.exists():
             self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.msg_spectra = self._filter_massspecgym_spectra(hydrogen_adduct_only=True)
+        self.msg_spectra = self._filter_massspecgym_spectra(hydrogen_adduct_only=False)
         self._add_required_metadata_for_sirius()
         self._split_orbitrap_qtof()
         self.orbitrap_mgf_path = self.output_dir / "sirius_orbitrap.mgf"

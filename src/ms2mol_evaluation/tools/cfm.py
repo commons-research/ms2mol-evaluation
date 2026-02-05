@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from typing import Dict, Iterable, List, Literal, Tuple
@@ -95,6 +96,24 @@ class CFMEvaluation(Evaluation):
             )
 
         return pd.read_csv(self.df_file_path)
+
+    def write_top_k_proba_to_json(self, df: pd.DataFrame) -> None:
+        df["is_correct"] = df["inchikey_isdb"] == df["inchikey_msg"]
+        df["rank"] = (
+            df.groupby("identifier")["FlashSimilarity"]
+            .rank(method="dense", ascending=False)
+            .astype("int32")
+        )
+        hist = (
+            df[df["is_correct"]]
+            .groupby("identifier")["rank"]
+            .min()
+            .value_counts()
+            .sort_index()
+        )
+        hist_proba = (hist / len(self.msg_spectra)).to_dict()
+        with open(self.output_dir / "probabilites.json", "w") as f:
+            json.dump(hist_proba, f, indent=4, sort_keys=True)
 
     def _create_scores_array(
         self, df: pd.DataFrame

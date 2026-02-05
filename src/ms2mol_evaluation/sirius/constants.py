@@ -25,7 +25,7 @@ SIRIUS_ORBITRAP_COMMAND = "config \
     --NumberOfCandidates=10 \
     --FormulaResultThreshold=true \
     --ExpansiveSearchConfidenceMode.confidenceScoreSimilarityMode=OFF \
-    --StructureSearchDB=lotusISDB \
+    --StructureSearchDB=lotusISDB,BIO \
     --RecomputeResults=false \
     spectra-search formulas fingerprints classes structures summaries --chemvista --feature-quality-summary --full-summary"
 
@@ -56,6 +56,6 @@ SIRIUS_QTOF_COMMAND = "config \
     --NumberOfCandidates=10 \
     --FormulaResultThreshold=true \
     --ExpansiveSearchConfidenceMode.confidenceScoreSimilarityMode=OFF \
-    --StructureSearchDB=lotusISDB \
+    --StructureSearchDB=lotusISDB,BIO \
     --RecomputeResults=false \
     spectra-search formulas fingerprints classes structures summaries --chemvista --feature-quality-summary --full-summary"
