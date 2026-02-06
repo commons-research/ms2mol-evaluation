@@ -9,6 +9,7 @@ from matchms import calculate_scores
 from matchms.similarity import PrecursorMzMatch
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from tqdm.auto import tqdm
+from tqdm.contrib import tzip
 
 from ms2mol_evaluation.evaluation import Evaluation
 
@@ -42,65 +43,57 @@ class CFMEvaluation(Evaluation):
             raise ValueError(
                 "MS2 similarity measure not set. Use `set_ms2_similarity` before using this function."
             )
-        interval = 1000
-        chunks_query = [
-            self.msg_spectra[x : x + interval]
-            for x in range(0, len(self.msg_spectra), interval)
-        ]
-        scans_id_map = {}
-        i = 0
-        for chunk_number, chunk in enumerate(tqdm(chunks_query)):
-            scores = calculate_scores(chunk, self.isdb_spectra, self.similarity_score)
-            idx_row = scores.scores[:, :][0]
-            idx_col = scores.scores[:, :][1]
-            for _ in chunk:
-                scans_id_map[i] = i
-                i += 1
 
-            data = []
-            for x, y in zip(idx_row, idx_col):
-                if x >= y:
-                    continue
-                res = self.ms2_similarity.pair(chunk[x], self.isdb_spectra[y])
-                try:
-                    msms_score, n_matches = res["score"], res["matches"]
-                except:
-                    msms_score = res
-                    n_matches = None
+        scores = calculate_scores(
+            references=self.msg_spectra,
+            queries=self.isdb_spectra,
+            array_type="numpy",
+            is_symmetric=False,
+            similarity_function=self.similarity_score,
+        )
+        indices = np.where(np.asarray(scores.scores.to_array()))
+        idx_row, idx_col = indices
 
-                # if (msms_score > 0.2) and (n_matches > 6):
+        data = []
+        for x, y in tzip(idx_row, idx_col):
+            msms_score, n_matches = self.ms2_similarity.pair(
+                self.msg_spectra[x], self.isdb_spectra[y]
+            )[()]
 
-                feature_id = scans_id_map[int(x) + int(interval * chunk_number)]
-                data.append(
-                    {
-                        self.ms2_similarity.__class__.__name__: msms_score,
-                        "matched_peaks": n_matches if n_matches is not None else np.nan,
-                        "feature_id": feature_id,
-                        "reference_id": y,  # code copied from https://github.com/mandelbrot-project/met_annot_enhancer/blob/f8346fd3f7a9775d1d6638cf091d019167ba7ce1/src/dev/spectral_lib_matcher.py#L175
-                        "inchikey_isdb": self.isdb_spectra[y].get("compound_name"),
-                        "smiles_isdb": self.isdb_spectra[y].get("smiles"),
-                        "inchikey_msg": chunk[x].get("inchikey"),
-                        "smiles_msg": chunk[x].get("smiles"),
-                        "adduct": chunk[x].get("adduct"),
-                        "instrument": chunk[x].get("instrument_type"),
-                        "identifier": chunk[x].get("identifier"),
-                    }
-                )
-            df = pd.DataFrame(data)
-            df.to_csv(
-                self.df_file_path,
-                mode="a",
-                header=not os.path.exists(self.df_file_path),
-                sep=",",
-                index=False,
+            data.append(
+                {
+                    self.ms2_similarity.__class__.__name__: msms_score,
+                    "matched_peaks": n_matches if n_matches is not None else np.nan,
+                    "matched_ratio": n_matches
+                    / max(
+                        len(self.msg_spectra[x].peaks.intensities),
+                        len(self.isdb_spectra[y].peaks.intensities),
+                    ),
+                    "feature_id": self.msg_spectra[x].get("feature_id") or x + 1,
+                    "reference_id": y,  # code copied from https://github.com/mandelbrot-project/met_annot_enhancer/blob/f8346fd3f7a9775d1d6638cf091d019167ba7ce1/src/dev/spectral_lib_matcher.py#L175
+                    "inchikey_isdb": self.isdb_spectra[y].get("compound_name"),
+                    "smiles_isdb": self.isdb_spectra[y].get("smiles"),
+                    "inchikey_msg": self.msg_spectra[x].get("inchikey"),
+                    "smiles_msg": self.msg_spectra[x].get("smiles"),
+                    "adduct": self.msg_spectra[x].get("adduct"),
+                    "instrument": self.msg_spectra[x].get("instrument_type"),
+                    "identifier": self.msg_spectra[x].get("identifier"),
+                }
             )
+        df = pd.DataFrame(data)
+        df.to_csv(
+            self.df_file_path,
+            header=True,
+            sep=",",
+            index=False,
+        )
 
-        return pd.read_csv(self.df_file_path)
+        return df
 
     def write_top_k_proba_to_json(self, df: pd.DataFrame) -> None:
         df["is_correct"] = df["inchikey_isdb"] == df["inchikey_msg"]
         df["rank"] = (
-            df.groupby("identifier")["FlashSimilarity"]
+            df.groupby("identifier")[f"{self.ms2_similarity.__class__.__name__}"]
             .rank(method="dense", ascending=False)
             .astype("int32")
         )
