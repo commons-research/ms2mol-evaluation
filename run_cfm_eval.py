@@ -8,7 +8,7 @@ from ms2mol_evaluation import CFMEvaluation
 def main():
     eval = CFMEvaluation(
         Path("evaluations/cfmid_lotus"),
-        precursor_mz_tolerance=10.0,
+        precursor_mz_tolerance=20.0,
         precursor_mz_tolerance_type="ppm",
     )
     ms2_similarity = ModifiedCosine(tolerance=0.01)
