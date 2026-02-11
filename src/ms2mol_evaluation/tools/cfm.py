@@ -6,7 +6,7 @@ from typing import Dict, Iterable, List, Literal, Tuple
 import numpy as np
 import pandas as pd
 from matchms import calculate_scores
-from matchms.similarity import PrecursorMzMatch
+from matchms.similarity import FlashSimilarity, PrecursorMzMatch
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from tqdm.auto import tqdm
 from tqdm.contrib import tzip
@@ -60,9 +60,14 @@ class CFMEvaluation(Evaluation):
                 self.msg_spectra[x], self.isdb_spectra[y]
             )[()]
 
+            entropy_sim = FlashSimilarity().pair(
+                self.msg_spectra[x], self.isdb_spectra[y]
+            )
+
             data.append(
                 {
                     self.ms2_similarity.__class__.__name__: msms_score,
+                    "entropy_similarity": entropy_sim,
                     "matched_peaks": n_matches if n_matches is not None else np.nan,
                     "matched_ratio": n_matches
                     / max(

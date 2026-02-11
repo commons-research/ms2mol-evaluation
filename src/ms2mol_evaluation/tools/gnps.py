@@ -81,46 +81,53 @@ class GNPSEvaluation(Evaluation):
             raise ValueError(
                 "MS2 similarity measure not set. Use `set_ms2_similarity` before using this function."
             )
-        scores = calculate_scores(
-            references=self.msg_spectra,
-            queries=self.gnps,
-            array_type="numpy",
-            is_symmetric=False,
-            similarity_function=self.similarity_score,
-        )
-        indices = np.where(np.asarray(scores.scores.to_array()))
-        idx_row, idx_col = indices
-
+        interval = 1000
+        chunks_query = [
+            self.msg_spectra[x : x + interval]
+            for x in range(0, len(self.msg_spectra), interval)
+        ]
+        scans_id_map = {}
+        i = 0
         data = []
-        for x, y in tzip(idx_row, idx_col):
-            msms_score, n_matches = self.ms2_similarity.pair(
-                self.msg_spectra[x], self.gnps[y]
-            )[()]
+        for chunk_number, chunk in enumerate(tqdm(chunks_query)):
+            scores = calculate_scores(chunk, self.gnps, self.similarity_score)
+            idx_row = scores.scores[:, :][0]
+            idx_col = scores.scores[:, :][1]
+            for _ in chunk:
+                scans_id_map[i] = i
+                i += 1
 
-            data.append(
-                {
-                    self.ms2_similarity.__class__.__name__: msms_score,
-                    "matched_peaks": n_matches if n_matches is not None else np.nan,
-                    "matched_ratio": n_matches
-                    / max(
-                        len(self.msg_spectra[x].peaks.intensities),
-                        len(self.isdb_spectra[y].peaks.intensities),
-                    ),
-                    "feature_id": self.msg_spectra[x].get("feature_id") or x + 1,
-                    "reference_id": y,  # code copied from https://github.com/mandelbrot-project/met_annot_enhancer/blob/f8346fd3f7a9775d1d6638cf091d019167ba7ce1/src/dev/spectral_lib_matcher.py#L175
-                    "inchikey_gnps": self.gnps[y].get("inchikey")[:14],
-                    "smiles_gnps": self.gnps[y].get("smiles"),
-                    "inchikey_msg": self.msg_spectra[x].get("inchikey"),
-                    "smiles_msg": self.msg_spectra[x].get("smiles"),
-                    "adduct": self.msg_spectra[x].get("adduct"),
-                    "instrument": self.msg_spectra[x].get("instrument_type"),
-                    "identifier": self.msg_spectra[x].get("identifier"),
-                }
-            )
+            for x, y in zip(idx_row, idx_col):
+                if x >= y:
+                    continue
+                res = self.ms2_similarity.pair(chunk[x], self.gnps[y])
+                try:
+                    msms_score, n_matches = res["score"], res["matches"]
+                except:
+                    msms_score = res
+                    n_matches = None
+
+                # if (msms_score > 0.2) and (n_matches > 6):
+
+                feature_id = scans_id_map[int(x) + int(interval * chunk_number)]
+                data.append(
+                    {
+                        self.ms2_similarity.__class__.__name__: msms_score,
+                        "matched_peaks": n_matches if n_matches is not None else np.nan,
+                        "feature_id": feature_id,
+                        "reference_id": y,  # code copied from https://github.com/mandelbrot-project/met_annot_enhancer/blob/f8346fd3f7a9775d1d6638cf091d019167ba7ce1/src/dev/spectral_lib_matcher.py#L175
+                        "inchikey_gnps": self.gnps[y].get("inchikey")[:14],
+                        "smiles_gnps": self.gnps[y].get("smiles"),
+                        "inchikey_msg": chunk[x].get("inchikey"),
+                        "smiles_msg": chunk[x].get("smiles"),
+                        "adduct": chunk[x].get("adduct"),
+                        "instrument": chunk[x].get("instrument_type"),
+                        "identifier": chunk[x].get("identifier"),
+                    }
+                )
         df = pd.DataFrame(data)
         df.to_csv(
             self.df_file_path,
-            header=True,
             sep=",",
             index=False,
         )
