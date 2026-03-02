@@ -1,4 +1,3 @@
-import ray
 from dict_hash import Hashable, sha256
 from matchms import Spectrum as MatchmsSpectrum
 
@@ -18,13 +17,3 @@ class Spectrum(MatchmsSpectrum, Hashable):
             },
             use_approximation=use_approximation,
         )
-
-
-@ray.remote
-def convert_matchms_spectrum_to_spectrum(spectrum: MatchmsSpectrum) -> Spectrum:
-    """Convert a matchms Spectrum to our Spectrum class."""
-    return Spectrum(
-        mz=spectrum.mz,
-        intensities=spectrum.intensities,
-        metadata=spectrum.metadata,
-    )

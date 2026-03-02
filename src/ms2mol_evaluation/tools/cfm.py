@@ -3,10 +3,11 @@ import os
 from pathlib import Path
 from typing import Dict, Iterable, List, Literal, Tuple
 
+import ms_entropy as me
 import numpy as np
 import pandas as pd
 from matchms import calculate_scores
-from matchms.similarity import FlashSimilarity, PrecursorMzMatch
+from matchms.similarity import PrecursorMzMatch
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from tqdm.auto import tqdm
 from tqdm.contrib import tzip
@@ -60,8 +61,10 @@ class CFMEvaluation(Evaluation):
                 self.msg_spectra[x], self.isdb_spectra[y]
             )[()]
 
-            entropy_sim = FlashSimilarity().pair(
-                self.msg_spectra[x], self.isdb_spectra[y]
+            entropy_sim = me.calculate_entropy_similarity(
+                self.msg_spectra[x].peaks,
+                self.isdb_spectra[y].peaks,
+                ms2_tolerance_in_da=0.01,
             )
 
             data.append(
