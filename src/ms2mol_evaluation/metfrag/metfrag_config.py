@@ -41,7 +41,7 @@ class MetFragConfig(Hashable):
             "PrecursorIonMode": adduct_to_int,
             "SampleName": str(results_file),
             "MetFragCandidateWriter": "CSV",
-            "DatabaseSearchRelativeMassDeviation": 10.0,
+            "DatabaseSearchRelativeMassDeviation": 20.0,
             "FragmentPeakMatchAbsoluteMassDeviation": 0.01,
             "IonizedPrecursorMass": precursor_mass,
             "MetFragScoreTypes": "FragmenterScore",

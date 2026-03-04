@@ -166,9 +166,20 @@ class MetFragEvaluation(Evaluation):
             delayed(self.run_metfrag)(spectrum)
             for spectrum in tqdm(self.msg_spectra, desc="Running metfrag")
         )
+
         resulting_dataframes = [i[2] for i in results]
         del results
         return resulting_dataframes
+
+    def concatenate_results(self, df_list: List[pd.DataFrame]) -> None:
+        assert len(df_list) == len(self.msg_spectra), "Length of df_list must match number of spectra"
+        for df,s in zip(df_list, self.msg_spectra):
+            if df.empty:
+                continue
+            df["identifier"] = s.get("identifier")
+            df["true_inchikey"] = s.get("inchikey")
+        combined_df = pd.concat(df_list, ignore_index=True)
+        combined_df.to_csv(self.output_dir / "combined_results.csv", index=False)
 
     def _create_scores_array(
         self,
