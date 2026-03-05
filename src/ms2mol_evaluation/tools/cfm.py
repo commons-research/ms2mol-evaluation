@@ -86,6 +86,7 @@ class CFMEvaluation(Evaluation):
                     "adduct": self.msg_spectra[x].get("adduct"),
                     "instrument": self.msg_spectra[x].get("instrument_type"),
                     "identifier": self.msg_spectra[x].get("identifier"),
+                    "fold": self.msg_spectra[x].get("fold"),
                 }
             )
         df = pd.DataFrame(data)
