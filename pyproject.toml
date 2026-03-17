@@ -10,7 +10,6 @@ requires-python = ">=3.12"
 dependencies = [
     "cache-decorator>=2.2.0",
     "downloaders>=1.0.22",
-    "dreams",
     "fiora",
     "ipywidgets>=8.1.7",
     "matchms>=0.31",
@@ -41,5 +40,4 @@ build-backend = "hatchling.build"
 dev = ["ipykernel>=6.29.5", "jupyterlab>=4.4.3", "ruff>=0.13.1"]
 
 [tool.uv.sources]
-dreams = { git = "https://github.com/mvisani/DreaMS" }
 fiora = { git = "https://github.com/BAMeScience/fiora" }

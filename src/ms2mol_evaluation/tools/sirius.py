@@ -2,7 +2,7 @@ import os
 import subprocess
 import typing as T
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple, Union
+from typing import Dict, Iterable, List, Tuple, Union, Sequence
 
 import numpy as np
 import pandas as pd
@@ -34,10 +34,10 @@ class SiriusEvaluation(Evaluation):
         self.qtof_mgf_path = self.output_dir / "sirius_qtof.mgf"
         self._save_mgf_file(self.msg_orbitrap, self.orbitrap_mgf_path)
         self._save_mgf_file(self.msg_qtof, self.qtof_mgf_path)
-        self._write_custom_db()
-        self._create_custom_db()
+        #self._write_custom_db()
+        #self._create_custom_db()
 
-    def _save_mgf_file(self, spectra: T.List[Spectrum], file_path: Path) -> None:
+    def _save_mgf_file(self, spectra: Sequence[Spectrum], file_path: Path) -> None:
         save_as_mgf(spectra, str(file_path), file_mode="w")
 
     def _add_required_metadata_for_sirius(self) -> None:
@@ -98,6 +98,7 @@ class SiriusEvaluation(Evaluation):
     def _create_command(self, mgf_path: Path, is_orbitrap: bool) -> T.List[str]:
         sirius_command = []
         sirius_command.append(self.sirius_executable)
+        sirius_command.append("--cores=16")
         sirius_command.append("--input")
         sirius_command.append(str(mgf_path.resolve()))
         sirius_command.append("--output")

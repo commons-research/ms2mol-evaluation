@@ -258,22 +258,14 @@ class Evaluation:
         self,
         hydrogen_adduct_only: bool = False,
     ) -> T.List[Spectrum]:
-        """Filter MassSpecGym spectra to only include those present in ISDB."""
-        isdb_inchikeys = set(s.get("compound_name") for s in self.isdb_spectra)
-        filtered_spectra = [
-            s
-            for s in tqdm(
-                self.msg_spectra, leave=False, desc="Filtering MassSpecGym spectra"
-            )
-            if s.get("inchikey") in isdb_inchikeys
-        ]
+        """Filter MassSpecGym spectra to have only the hdyrogen adducts or not."""
         if hydrogen_adduct_only:
-            filtered_spectra = [
-                s for s in filtered_spectra if s.get("adduct") == "[M+H]+"
+            return [
+                s for s in self.msg_spectra if s.get("adduct") == "[M+H]+"
             ]
 
         self.msg_is_filtered = True
-        return filtered_spectra
+        return self.msg_spectra
 
     def plot_results(self, x_axis, y_axis, interval, image_name: str) -> None:
         # Plotting

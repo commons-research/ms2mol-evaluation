@@ -30,7 +30,7 @@ class MetFragEvaluation(Evaluation):
         self.metfrag_executable: Path = Path(
             MetFragEvaluation.download_metfrag_exec().destination.values[0]
         )
-        self.msg_spectra = self._filter_massspecgym_spectra(hydrogen_adduct_only=True)
+        self.msg_spectra = self._filter_massspecgym_spectra(hydrogen_adduct_only=False)
 
     @staticmethod
     def download_metfrag_exec(

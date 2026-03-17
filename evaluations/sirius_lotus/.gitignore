@@ -1,7 +1,0 @@
-*.siriusdb
-*.tsv
-*.csv
-*.mgf
-*.sirius
-sirius_qtof/
-sirius_orbitrap/

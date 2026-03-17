@@ -11,8 +11,8 @@ def main():
 
     res = eval.run_eval(n_jobs=8)
     eval.concatenate_results(res)
-    eval.get_fraction_results(res)
-    eval.get_top_n_results(res)
+    # eval.get_fraction_results(res)
+    # eval.get_top_n_results(res)
 
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ class CFMEvaluation(Evaluation):
         if os.path.exists(self.df_file_path):
             os.remove(self.df_file_path)
 
-        self.msg_spectra = self._filter_massspecgym_spectra(hydrogen_adduct_only=True)
+        self.msg_spectra = self._filter_massspecgym_spectra(hydrogen_adduct_only=False)
         self.similarity_score = PrecursorMzMatch(
             tolerance=precursor_mz_tolerance,
             tolerance_type=precursor_mz_tolerance_type,
