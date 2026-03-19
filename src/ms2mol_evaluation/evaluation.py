@@ -260,9 +260,7 @@ class Evaluation:
     ) -> T.List[Spectrum]:
         """Filter MassSpecGym spectra to have only the hdyrogen adducts or not."""
         if hydrogen_adduct_only:
-            return [
-                s for s in self.msg_spectra if s.get("adduct") == "[M+H]+"
-            ]
+            return [s for s in self.msg_spectra if s.get("adduct") == "[M+H]+"]
 
         self.msg_is_filtered = True
         return self.msg_spectra

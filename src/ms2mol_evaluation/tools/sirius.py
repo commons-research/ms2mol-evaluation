@@ -1,15 +1,14 @@
 import os
 import subprocess
-import typing as T
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple, Union, Sequence
+from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
-from matchms import Spectrum as MatchMSSpectrum
 from matchms.exporting import save_as_mgf
 from tqdm.auto import tqdm
+from typing import cast
 
 from ms2mol_evaluation.evaluation import Evaluation
 from ms2mol_evaluation.sirius.constants import (
@@ -22,7 +21,7 @@ load_dotenv()
 
 
 class SiriusEvaluation(Evaluation):
-    def __init__(self, output_dir: Union[Path, str]) -> None:
+    def __init__(self, output_dir: Path | str) -> None:
         super().__init__(output_dir)
         self.sirius_executable = os.getenv("SIRIUS_PATH")
         if not self.output_dir.exists():
@@ -30,14 +29,22 @@ class SiriusEvaluation(Evaluation):
         self.msg_spectra = self._filter_massspecgym_spectra(hydrogen_adduct_only=False)
         self._add_required_metadata_for_sirius()
         self._split_orbitrap_qtof()
-        self.orbitrap_mgf_path = self.output_dir / "sirius_orbitrap.mgf"
+        self.orbitrap_mgf_path: list[Path] = []
         self.qtof_mgf_path = self.output_dir / "sirius_qtof.mgf"
-        self._save_mgf_file(self.msg_orbitrap, self.orbitrap_mgf_path)
-        self._save_mgf_file(self.msg_qtof, self.qtof_mgf_path)
-        #self._write_custom_db()
-        #self._create_custom_db()
+        chunk_size = 30000
+        for chunk_number, i in enumerate(range(0, len(self.msg_spectra), chunk_size)):
+            filename = self.output_dir / f"sirius_orbitrap_{chunk_number}.mgf"
+            self.orbitrap_mgf_path.append(filename)
+            self._save_mgf_file(
+                self.msg_spectra[i : i + chunk_size],
+                filename,
+            )
 
-    def _save_mgf_file(self, spectra: Sequence[Spectrum], file_path: Path) -> None:
+        self._save_mgf_file(self.msg_qtof, self.qtof_mgf_path)
+        # self._write_custom_db()
+        # self._create_custom_db()
+
+    def _save_mgf_file(self, spectra: Iterable[Spectrum], file_path: Path) -> None:
         save_as_mgf(spectra, str(file_path), file_mode="w")
 
     def _add_required_metadata_for_sirius(self) -> None:
@@ -95,7 +102,7 @@ class SiriusEvaluation(Evaluation):
         subprocess.run(create_command, check=True)
         subprocess.run(import_command, check=True)
 
-    def _create_command(self, mgf_path: Path, is_orbitrap: bool) -> T.List[str]:
+    def _create_command(self, mgf_path: Path, is_orbitrap: bool) -> list[str]:
         sirius_command = []
         sirius_command.append(self.sirius_executable)
         sirius_command.append("--cores=16")
@@ -111,30 +118,38 @@ class SiriusEvaluation(Evaluation):
         return sirius_command
 
     def run_eval(self) -> pd.DataFrame:
-        orbi_command = self._create_command(self.orbitrap_mgf_path, True)
+        orbi_command = [self._create_command(i, True) for i in self.orbitrap_mgf_path]
         qtof_command = self._create_command(self.qtof_mgf_path, False)
 
-        subprocess.run(orbi_command, check=True)
+        for i in orbi_command:
+            subprocess.run(i, check=True)
         subprocess.run(qtof_command, check=True)
 
-        sirius_orbi = pd.read_csv(
-            self.orbitrap_mgf_path.resolve().with_suffix("")
-            / "structure_identifications_all.tsv",
-            sep="\t",
-        )
-        sirius_orbi["instrument_type"] = "Orbitrap"
+        dataframe_list: list[pd.DataFrame] = []
+        for filename in self.orbitrap_mgf_path:
+            sirius_orbi = pd.read_csv(
+                filename.resolve().with_suffix("")
+                / "structure_identifications_all.tsv",
+                sep="\t",
+            )
+            sirius_orbi["instrument_type"] = "Orbitrap"
+            dataframe_list.append(sirius_orbi)
+
+        # now the single QTOF
         sirius_qtof = pd.read_csv(
             self.qtof_mgf_path.resolve().with_suffix("")
             / "structure_identifications_all.tsv",
             sep="\t",
         )
         sirius_qtof["instrument_type"] = "QTOF"
-        return pd.concat([sirius_orbi, sirius_qtof], ignore_index=True)
+
+        dataframe_list.append(sirius_qtof)
+        return pd.concat(dataframe_list, ignore_index=True)
 
     def _create_scores_array(
         self,
         df: pd.DataFrame,
-    ) -> Tuple[List[str], List[str], Dict[str, str]]:
+    ) -> tuple[list[str], list[str], dict[str, str]]:
         mass_spec_gym = self._load_massspecgym()
         identifier_to_inchikey = {}
         for msg_id, msg_inchikey in zip(mass_spec_gym.index, mass_spec_gym.inchikey):
@@ -143,12 +158,15 @@ class SiriusEvaluation(Evaluation):
         del mass_spec_gym
 
         df["true_inchikey"] = df["mappingFeatureId"].map(identifier_to_inchikey)
-        index: T.List[str] = [s.get("identifier") for s in self.msg_spectra]
+        index = [s.get("identifier") for s in self.msg_spectra]
+        index = cast(list[str], index)
         identifier_to_inchikey = {
             s.get("identifier"): s.get("inchikey") for s in self.msg_spectra
         }
+        identifier_to_inchikey = cast(dict[str, str], identifier_to_inchikey)
         id_to_int = {s.get("identifier"): i for i, s in enumerate(self.msg_spectra)}
         all_inchikeys = sorted(set(s.get("compound_name") for s in self.isdb_spectra))
+        all_inchikeys = cast(list[str], all_inchikeys)
         inchi_to_int = {inchk: i for i, inchk in enumerate(all_inchikeys)}
 
         self.scores = np.empty(

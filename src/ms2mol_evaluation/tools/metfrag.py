@@ -1,8 +1,8 @@
 import os
 import subprocess
-import typing as T
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -49,8 +49,8 @@ class MetFragEvaluation(Evaluation):
     def run_metfrag(
         self,
         spectrum: Spectrum,
-        config_params: T.Optional[T.Dict[str, T.Any]] = None,
-    ) -> T.Tuple[Path, "MetFragConfig", pd.DataFrame]:
+        config_params: dict[str, Any] | None = None,
+    ) -> tuple[Path, "MetFragConfig", pd.DataFrame]:
         """
         Run MetFrag on a given spectrum with the provided configuration, or load results if they already exist.
 
@@ -115,8 +115,8 @@ class MetFragEvaluation(Evaluation):
     def create_metfrag_config(
         self,
         spectrum: Spectrum,
-        config_params: T.Optional[T.Dict[str, T.Any]] = None,
-    ) -> T.Tuple[Path, "MetFragConfig"]:
+        config_params: dict[str, Any] | None = None,
+    ) -> tuple[Path, "MetFragConfig"]:
         # Step 1: Compute spectrum hash
         spectrum_hash = self.get_spectrum_hash(spectrum, use_approximation=False)
 
@@ -160,7 +160,7 @@ class MetFragEvaluation(Evaluation):
         config_file = self.write_metfrag_config(config)
         return config_file, config
 
-    def run_eval(self, n_jobs: int) -> List[pd.DataFrame]:
+    def run_eval(self, n_jobs: int) -> list[pd.DataFrame]:
         self._create_postgres_db()
         results = Parallel(n_jobs=n_jobs, backend="threading")(
             delayed(self.run_metfrag)(spectrum)
@@ -171,9 +171,11 @@ class MetFragEvaluation(Evaluation):
         del results
         return resulting_dataframes
 
-    def concatenate_results(self, df_list: List[pd.DataFrame]) -> None:
-        assert len(df_list) == len(self.msg_spectra), "Length of df_list must match number of spectra"
-        for df,s in zip(df_list, self.msg_spectra):
+    def concatenate_results(self, df_list: list[pd.DataFrame]) -> None:
+        assert len(df_list) == len(self.msg_spectra), (
+            "Length of df_list must match number of spectra"
+        )
+        for df, s in zip(df_list, self.msg_spectra):
             if df.empty:
                 continue
             df["identifier"] = s.get("identifier")
@@ -183,9 +185,9 @@ class MetFragEvaluation(Evaluation):
 
     def _create_scores_array(
         self,
-        df_list: List[pd.DataFrame],
-    ) -> Tuple[List[str], List[str], Dict[str, str]]:
-        index: List[str] = [s.get("identifier") for s in self.msg_spectra]
+        df_list: list[pd.DataFrame],
+    ) -> tuple[list[str], list[str], dict[str, str]]:
+        index: list[str] = [s.get("identifier") for s in self.msg_spectra]
         identifier_to_inchikey = {
             s.get("identifier"): s.get("inchikey") for s in self.msg_spectra
         }
@@ -287,7 +289,7 @@ class MetFragEvaluation(Evaluation):
 
     def get_fraction_results(
         self,
-        df_list: List[pd.DataFrame],
+        df_list: list[pd.DataFrame],
         interval: Iterable[float] = np.arange(0.0, 1.0, 0.05),
     ) -> None:
         (
@@ -307,7 +309,7 @@ class MetFragEvaluation(Evaluation):
 
     def get_top_n_results(
         self,
-        df_list: List[pd.DataFrame],
+        df_list: list[pd.DataFrame],
         interval: Iterable[int] = [1, 2, 5, 10, 20, 50, 100, 200, 500],
     ) -> None:
         (

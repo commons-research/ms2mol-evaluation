@@ -15,8 +15,8 @@ def main():
     eval.set_ms2_similarity(ms2_similarity)
     res = eval.run_eval()
     eval.write_top_k_proba_to_json(res)
-    #eval.get_fraction_results(res)
-    #eval.get_top_n_results(res)
+    # eval.get_fraction_results(res)
+    # eval.get_top_n_results(res)
 
 
 if __name__ == "__main__":
