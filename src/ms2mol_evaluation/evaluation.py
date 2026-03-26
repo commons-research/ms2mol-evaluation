@@ -5,7 +5,6 @@ from typing import Union
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import polars as pl
 import seaborn as sns
 from cache_decorator import Cache
 from downloaders import BaseDownloader

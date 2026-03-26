@@ -131,6 +131,8 @@ class SiriusEvaluation(Evaluation):
                 filename.resolve().with_suffix("")
                 / "structure_identifications_all.tsv",
                 sep="\t",
+                engine="python",  # Skip bad lines because Sirius doesn't format correctly tsv files...
+                on_bad_lines="skip",  # Skip bad lines because Sirius doesn't format correctly tsv files...
             )
             sirius_orbi["instrument_type"] = "Orbitrap"
             dataframe_list.append(sirius_orbi)
@@ -144,7 +146,9 @@ class SiriusEvaluation(Evaluation):
         sirius_qtof["instrument_type"] = "QTOF"
 
         dataframe_list.append(sirius_qtof)
-        return pd.concat(dataframe_list, ignore_index=True)
+        df = pd.concat(dataframe_list, ignore_index=True)
+        df.to_csv(self.output_dir / "structure_identifications_all.csv.gz")
+        return df
 
     def _create_scores_array(
         self,

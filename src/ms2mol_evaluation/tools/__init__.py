@@ -3,6 +3,7 @@ from .fiora import FioraEvaluation
 from .iceberg import IcebergEvaluation
 from .metfrag import MetFragEvaluation
 from .sirius import SiriusEvaluation
+from .gnps import GNPSEvaluation
 
 __all__ = [
     "CFMEvaluation",
@@ -10,4 +11,5 @@ __all__ = [
     "MetFragEvaluation",
     "SiriusEvaluation",
     "FioraEvaluation",
+    "GNPSEvaluation",
 ]
