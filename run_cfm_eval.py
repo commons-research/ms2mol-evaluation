@@ -11,7 +11,7 @@ def main():
         precursor_mz_tolerance=20.0,
         precursor_mz_tolerance_type="ppm",
     )
-    ms2_similarity = ModifiedCosineGreedy(tolerance=0.01)
+    ms2_similarity = ModifiedCosineGreedy()
     eval.set_ms2_similarity(ms2_similarity)
     res = eval.run_eval()
     eval.write_top_k_proba_to_json(res)

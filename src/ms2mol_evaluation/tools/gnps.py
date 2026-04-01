@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Literal
 import ms_entropy as me
 from ..gnps.download import load_gnps
-import numpy as np
 import pandas as pd
 from matchms import calculate_scores
 from matchms.similarity import PrecursorMzMatch
@@ -23,7 +22,7 @@ class GNPSEvaluation(Evaluation):
         super().__init__(output_dir)
         if not self.output_dir.exists():
             self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.df_file_path = self.output_dir / "gnps_scores.csv"
+        self.df_file_path = self.output_dir / "gnps_scores.csv.gz"
         if os.path.exists(self.df_file_path):
             os.remove(self.df_file_path)
 
@@ -34,17 +33,19 @@ class GNPSEvaluation(Evaluation):
         )
         self.gnps: list[Spectrum] = load_gnps("downloads/gnps/GNPS.mgf")
         self.filter_gnps()
-        
+
     def set_ms2_similarity(self, similarity: BaseSimilarity) -> None:
         self.ms2_similarity = similarity
 
     def filter_gnps(self) -> None:
+        print("Number of spectra in GNPS before filtering: ", len(self.gnps))
         msg_hashes = {s.spectrum_hash() for s in self.msg_spectra}
         self.gnps = [
             s
             for s in tqdm(self.gnps, desc="Filtering GNPS lib", leave=False)
             if s.spectrum_hash() not in msg_hashes
         ]
+        print("Number of spectra in GNPS after filtering: ", len(self.gnps))
 
     def run_eval(self) -> pd.DataFrame:
         if not hasattr(self, "ms2_similarity"):
@@ -68,19 +69,20 @@ class GNPSEvaluation(Evaluation):
                 i += 1
 
             for x, y in zip(idx_row, idx_col):
+                query_spectrum: Spectrum = chunk[x]
+                reference_spectrum: Spectrum = self.gnps[y]
                 if x >= y:
                     continue
-                res = self.ms2_similarity.pair(chunk[x], self.gnps[y])
+                res = self.ms2_similarity.pair(query_spectrum, reference_spectrum)
                 try:
-                    msms_score, n_matches = res["score"], res["matches"]
+                    msms_score, _ = res["score"], res["matches"]
                 except:
                     msms_score = res
-                    n_matches = None
+                    _ = None
 
                 entropy_sim = me.calculate_entropy_similarity(
-                    chunk[x].peaks,
-                    self.gnps[y].peaks,
-                    ms2_tolerance_in_da=0.01,
+                    query_spectrum.peaks,
+                    reference_spectrum.peaks,
                 )
 
                 feature_id = scans_id_map[int(x) + int(interval * chunk_number)]
@@ -88,22 +90,32 @@ class GNPSEvaluation(Evaluation):
                     {
                         self.ms2_similarity.__class__.__name__: msms_score,
                         "entropy_similarity": entropy_sim,
-                        "matched_peaks": n_matches if n_matches is not None else np.nan,
-                        "matched_ratio": n_matches
-                        / max(
-                            len(self.msg_spectra[x].peaks.intensities),
-                            len(self.gnps[y].peaks.intensities),
-                        ),
                         "feature_id": feature_id,
                         "reference_id": y,  # code copied from https://github.com/mandelbrot-project/met_annot_enhancer/blob/f8346fd3f7a9775d1d6638cf091d019167ba7ce1/src/dev/spectral_lib_matcher.py#L175
-                        "inchikey_gnps": self.gnps[y].get("inchikey")[:14],
-                        "smiles_gnps": self.gnps[y].get("smiles"),
-                        "inchikey_msg": chunk[x].get("inchikey"),
-                        "smiles_msg": chunk[x].get("smiles"),
-                        "adduct": chunk[x].get("adduct"),
-                        "instrument": chunk[x].get("instrument_type"),
-                        "identifier": chunk[x].get("identifier"),
-                        "fold": chunk[x].get("fold"),
+                        "inchikey_gnps": reference_spectrum.get("inchikey")[:14],
+                        "smiles_gnps": reference_spectrum.get("smiles"),
+                        "inchikey_msg": query_spectrum.get("inchikey"),
+                        "smiles_msg": query_spectrum.get("smiles"),
+                        "adduct": query_spectrum.get("adduct"),
+                        "instrument": query_spectrum.get("instrument_type"),
+                        "identifier": query_spectrum.get("identifier"),
+                        "fold": query_spectrum.get("fold"),
+                        "msg_entropy": me.calculate_spectral_entropy(
+                            query_spectrum.peaks
+                        ),
+                        "gnps_entropy": me.calculate_spectral_entropy(
+                            reference_spectrum.peaks
+                        ),
+                        "abs_precursor_mz_diff": abs(
+                            query_spectrum.get("precursor_mz")
+                            - reference_spectrum.get("precursor_mz")
+                        ),
+                        "ppm_precursor_mz_diff": abs(
+                            query_spectrum.get("precursor_mz")
+                            - reference_spectrum.get("precursor_mz")
+                        )
+                        / reference_spectrum.get("precursor_mz")
+                        * 1e6,
                     }
                 )
         df = pd.DataFrame(data)

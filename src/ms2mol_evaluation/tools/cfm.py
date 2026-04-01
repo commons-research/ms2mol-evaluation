@@ -26,7 +26,7 @@ class CFMEvaluation(Evaluation):
         super().__init__(output_dir)
         if not self.output_dir.exists():
             self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.df_file_path = self.output_dir / "cfmid_scores.csv"
+        self.df_file_path = self.output_dir / "cfmid_scores.csv.gz"
         if os.path.exists(self.df_file_path):
             os.remove(self.df_file_path)
 
@@ -57,36 +57,45 @@ class CFMEvaluation(Evaluation):
 
         data = []
         for x, y in tzip(idx_row, idx_col):
+            query_spectrum = self.msg_spectra[x]
+            reference_spectrum = self.isdb_spectra[y]
             msms_score, n_matches = self.ms2_similarity.pair(
-                self.msg_spectra[x], self.isdb_spectra[y]
+                query_spectrum, reference_spectrum
             )[()]
 
             entropy_sim = me.calculate_entropy_similarity(
-                self.msg_spectra[x].peaks,
-                self.isdb_spectra[y].peaks,
-                ms2_tolerance_in_da=0.01,
+                query_spectrum.peaks,
+                reference_spectrum.peaks,
             )
 
             data.append(
                 {
                     self.ms2_similarity.__class__.__name__: msms_score,
                     "entropy_similarity": entropy_sim,
-                    "matched_peaks": n_matches if n_matches is not None else np.nan,
-                    "matched_ratio": n_matches
-                    / max(
-                        len(self.msg_spectra[x].peaks.intensities),
-                        len(self.isdb_spectra[y].peaks.intensities),
-                    ),
-                    "feature_id": self.msg_spectra[x].get("feature_id") or x + 1,
+                    "feature_id": query_spectrum.get("feature_id") or x + 1,
                     "reference_id": y,  # code copied from https://github.com/mandelbrot-project/met_annot_enhancer/blob/f8346fd3f7a9775d1d6638cf091d019167ba7ce1/src/dev/spectral_lib_matcher.py#L175
-                    "inchikey_isdb": self.isdb_spectra[y].get("compound_name"),
-                    "smiles_isdb": self.isdb_spectra[y].get("smiles"),
-                    "inchikey_msg": self.msg_spectra[x].get("inchikey"),
-                    "smiles_msg": self.msg_spectra[x].get("smiles"),
-                    "adduct": self.msg_spectra[x].get("adduct"),
-                    "instrument": self.msg_spectra[x].get("instrument_type"),
-                    "identifier": self.msg_spectra[x].get("identifier"),
-                    "fold": self.msg_spectra[x].get("fold"),
+                    "inchikey_isdb": reference_spectrum.get("compound_name"),
+                    "smiles_isdb": reference_spectrum.get("smiles"),
+                    "inchikey_msg": query_spectrum.get("inchikey"),
+                    "smiles_msg": query_spectrum.get("smiles"),
+                    "adduct": query_spectrum.get("adduct"),
+                    "instrument": query_spectrum.get("instrument_type"),
+                    "identifier": query_spectrum.get("identifier"),
+                    "fold": query_spectrum.get("fold"),
+                    "msg_entropy": me.calculate_spectral_entropy(query_spectrum.peaks),
+                    "isdb_entropy": me.calculate_spectral_entropy(
+                        reference_spectrum.peaks
+                    ),
+                    "abs_precursor_mz_diff": abs(
+                        query_spectrum.get("precursor_mz")
+                        - reference_spectrum.get("precursor_mz")
+                    ),
+                    "ppm_precursor_mz_diff": abs(
+                        query_spectrum.get("precursor_mz")
+                        - reference_spectrum.get("precursor_mz")
+                    )
+                    / reference_spectrum.get("precursor_mz")
+                    * 1e6,
                 }
             )
         df = pd.DataFrame(data)
