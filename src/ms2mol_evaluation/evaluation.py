@@ -140,7 +140,7 @@ class Evaluation:
         Load the MassSpecGym dataset.
         """
         df = pd.read_csv(
-            "hf://datasets/roman-bushuiev/MassSpecGym/data/MassSpecGym.tsv",
+            "hf://datasets/roman-bushuiev/MassSpecGym/data/MassSpecGym1.5.tsv",
             sep="\t",
         )
         df = df.set_index("identifier")
