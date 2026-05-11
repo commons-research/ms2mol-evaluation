@@ -1,14 +1,14 @@
 import os
 import subprocess
-from pathlib import Path
 from collections.abc import Iterable
+from pathlib import Path
+from typing import cast
 
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from matchms.exporting import save_as_mgf
 from tqdm.auto import tqdm
-from typing import cast
 
 from ms2mol_evaluation.evaluation import Evaluation
 from ms2mol_evaluation.sirius.constants import (
@@ -147,7 +147,9 @@ class SiriusEvaluation(Evaluation):
 
         dataframe_list.append(sirius_qtof)
         df = pd.concat(dataframe_list, ignore_index=True)
-        df.to_csv(self.output_dir / "structure_identifications_all.csv.gz")
+        df.to_parquet(
+            self.output_dir / "structure_identifications_all.parquet", index=False
+        )
         return df
 
     def _create_scores_array(

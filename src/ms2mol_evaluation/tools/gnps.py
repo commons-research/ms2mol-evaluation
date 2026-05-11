@@ -1,15 +1,18 @@
 import os
 from pathlib import Path
 from typing import Literal
+
 import ms_entropy as me
-from ..gnps.download import load_gnps
 import pandas as pd
 from matchms import calculate_scores
 from matchms.similarity import PrecursorMzMatch
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from tqdm.auto import tqdm
+
 from ms2mol_evaluation.evaluation import Evaluation
 from ms2mol_evaluation.spectrum import Spectrum
+
+from ..gnps.download import load_gnps
 
 
 class GNPSEvaluation(Evaluation):
@@ -22,7 +25,7 @@ class GNPSEvaluation(Evaluation):
         super().__init__(output_dir)
         if not self.output_dir.exists():
             self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.df_file_path = self.output_dir / "gnps_scores.csv.gz"
+        self.df_file_path = self.output_dir / "gnps_scores.parquet"
         if os.path.exists(self.df_file_path):
             os.remove(self.df_file_path)
 
@@ -119,10 +122,6 @@ class GNPSEvaluation(Evaluation):
                     }
                 )
         df = pd.DataFrame(data)
-        df.to_csv(
-            self.df_file_path,
-            sep=",",
-            index=False,
-        )
+        df.to_parquet(self.df_file_path, index=False)
 
         return df

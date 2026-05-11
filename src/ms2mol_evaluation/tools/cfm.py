@@ -26,7 +26,7 @@ class CFMEvaluation(Evaluation):
         super().__init__(output_dir)
         if not self.output_dir.exists():
             self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.df_file_path = self.output_dir / "cfmid_scores.csv.gz"
+        self.df_file_path = self.output_dir / "cfmid_scores.parquet"
         if os.path.exists(self.df_file_path):
             os.remove(self.df_file_path)
 
@@ -99,10 +99,8 @@ class CFMEvaluation(Evaluation):
                 }
             )
         df = pd.DataFrame(data)
-        df.to_csv(
+        df.to_parquet(
             self.df_file_path,
-            header=True,
-            sep=",",
             index=False,
         )
 
